@@ -1,4 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import { Layout, Menu } from 'ant-design-vue'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(Layout)
+app.use(Menu)
+app.mount("#app")
