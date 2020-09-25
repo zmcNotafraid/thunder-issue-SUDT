@@ -74,9 +74,48 @@ const getCells = async (lockArgs: string): Promise<any> => {
     console.error('error', error)
   }
 }
-
+interface Transaction {
+  version: string;
+  cellDeps: Array<object>;
+  headerDeps: Array<object>;
+  inputs: Array<object>;
+  outputs: Array<object>;
+  witnesses: Array<object>;
+  outputsData: Array<string>;
+}
+const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHash: {}) => {
+  const rawTransaction: Transaction = rawTx
+  rawTransaction.witnesses[0] = {
+    lock: '',
+    inputType: '',
+    outputType: ''
+  }
+  try {
+    const res = await fetch(Const.RICH_NODE_INDEXER_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        id: 4,
+        jsonrpc: '2.0',
+        method: 'sign_and_send_transaction',
+        params: {
+          tx: rawTransaction,
+          lockHash
+        }
+      })
+    })
+    const response = await res.json()
+    return response.result
+  } catch (error) {
+    console.error('error', error)
+  }
+}
 export default {
   requestAuth: requestAuth,
   queryAddresses: queryAddresses,
-  getCells: getCells
+  getCells: getCells,
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  sign_and_send_transaction: signAndSendTransaction
 }

@@ -1,3 +1,7 @@
+import Const from "./const"
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { bytesToHex } = require('@nervosnetwork/ckb-sdk-utils')
+
 const getSummary = function (cells: Array<any>) {
   const inuse = cells
     .filter(cell => cell.output_data !== '0x')
@@ -30,7 +34,38 @@ const formatCkb = function (value: number): string | undefined {
   return integerStr + '.' + fractionStr
 }
 
+const getRawTxTemplate = function () {
+  return {
+    version: '0x0',
+    cellDeps: [
+      {
+        outPoint: {
+          txHash: Const.SUDT_TX_HASH,
+          index: '0x0'
+        },
+        depType: 'code'
+      }
+    ],
+    headerDeps: [],
+    inputs: [],
+    outputs: [],
+    witnesses: [],
+    outputsData: []
+  }
+}
+
+const textToHex = function(text: string) {
+  let result = text.trim()
+  if (result.startsWith('0x')) {
+    return result
+  }
+  result = bytesToHex(new TextEncoder().encode(result))
+  return result
+}
+
 export default {
   getSummary: getSummary,
-  formatCkb: formatCkb
+  formatCkb: formatCkb,
+  getRawTxTemplate: getRawTxTemplate,
+  textToHex: textToHex
 }
