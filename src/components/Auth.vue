@@ -21,8 +21,8 @@
   </form>
   <form>
     <label>UDT Count</label>
-    <input type="number" :value="count" />
-    <button @click="issue">Issue</button>
+    <input type="number" v-model="count" />
+    <button @click.prevent="issue()">Issue</button>
   </form>
 </template>
 
@@ -62,7 +62,7 @@ export default defineComponent({
         lockScript: {}
       } as Wallet,
       loading: false,
-      count: '0'
+      count: "0"
     }
   },
   methods: {
@@ -105,20 +105,29 @@ export default defineComponent({
     },
     issue: async function (): Promise<any> {
       const rawTx: Transaction = Utils.getRawTxTemplate()
-      const outputCapacity = new BN(0)
+      const outputCapacity = new BN(555)
+      rawTx.inputs.push({
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        previousOutput: {
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          txHash: Const.SUDT_TX_HASH,
+          index: "0x0"
+        },
+        since: "0x0"
+      })
 
       rawTx.outputs.push({
         capacity: `0x${outputCapacity.toString(16)}`,
         lock: this.wallet.lockScript,
         type: {
           // eslint-disable-next-line @typescript-eslint/camelcase
-          code_hash: Const.SUDT_CODE_HASH,
+          codeHash: Const.SUDT_CODE_HASH,
           // eslint-disable-next-line @typescript-eslint/camelcase
-          hash_type: Const.SUDT_HASH_TYPE,
+          hashType: Const.SUDT_HASH_TYPE,
           args: Utils.textToHex(uuidv4())
         }
       })
-      rawTx.outputsData.push(this.count)
+      rawTx.outputsData.push(Utils.textToHex(this.count))
 
       const authToken: string | null = window.localStorage.getItem("authToken")
 
@@ -126,7 +135,11 @@ export default defineComponent({
         console.error("No auth token")
         return
       }
-      await Rpc.sign_and_send_transaction(rawTx, authToken, this.wallet.lockHash)
+      await Rpc.sign_and_send_transaction(
+        rawTx,
+        authToken,
+        this.wallet.lockHash
+      )
     }
   }
 })

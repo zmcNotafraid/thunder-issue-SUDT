@@ -3,7 +3,7 @@ const SECP256K1_BLAKE160_CODE_HASH = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d
 const RICH_NODE_INDEXER_URL = 'http://localhost:8116'
 const SUDT_CODE_HASH = "0x3eb2781fedc31519da86c32c35cd8be93d26ed0771d773b36579d3ba4d013107"
 const SUDT_TX_HASH = "0x407388c4daf53ccc43653438a52bf6c6b60dec8298342dbb27b2270e1d4d427d"
-const SUDT_HASH_TYPE = "data"
+const SUDT_HASH_TYPE = 'data'
 
 export default {
   KEYPERING_URL: KEYPERING_URL,

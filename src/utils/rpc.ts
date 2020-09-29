@@ -91,18 +91,19 @@ const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHas
     outputType: ''
   }
   try {
-    const res = await fetch(Const.RICH_NODE_INDEXER_URL, {
+    const res = await fetch(Const.KEYPERING_URL, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        id: 4,
+        id: 1,
         jsonrpc: '2.0',
         method: 'sign_and_send_transaction',
         params: {
           tx: rawTransaction,
-          lockHash
+          description: "Transaction",
+          lockHash: lockHash
         }
       })
     })
