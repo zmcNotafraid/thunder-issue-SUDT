@@ -1,7 +1,9 @@
 <template>
   <div class="Auth">
     <button @click.prevent="getAuth()">Request Auth</button>
-    <button @click.prevent="reload()">Reload{{ (loading && 'ing..') || '' }}</button>
+    <button @click.prevent="reload()">
+      Reload{{ (loading && "ing..") || "" }}
+    </button>
   </div>
   <form>
     <div class="panel">
@@ -37,9 +39,13 @@ import BN from "bn.js"
 interface Wallet {
   lockScript: {};
   address: string;
-  free: string | undefined;
-  capacity: string | undefined;
+  free: string;
+  capacity: string;
   lockHash: string;
+}
+interface Summary {
+  free: number;
+  capacity: number;
 }
 interface Transaction {
   version: string;
@@ -47,8 +53,15 @@ interface Transaction {
   headerDeps: Array<object>;
   inputs: Array<object>;
   outputs: Array<object>;
-  witnesses: Array<object>;
+  witnesses: Array<string | object>;
   outputsData: Array<string>;
+}
+interface Cell {
+  output_data: string;
+  out_point: {
+    tx_hash: string;
+    index: string;
+  };
 }
 
 export default defineComponent({
@@ -61,8 +74,13 @@ export default defineComponent({
         lockHash: "",
         lockScript: {}
       } as Wallet,
+      summary: {
+        free: 0,
+        capacity: 0
+      },
       loading: false,
-      count: "0"
+      count: "0",
+      emptyCells: []
     }
   },
   methods: {
@@ -77,16 +95,19 @@ export default defineComponent({
       try {
         const addresses = (await Rpc.queryAddresses(authToken)).addresses
         if (addresses && addresses.length > 0) {
-          this.wallet.address = addresses[0].address
-          this.wallet.lockHash = addresses[0].lockHash
-          this.wallet.lockScript = addresses[0].lockScript
-          const lockArgs = addresses[0].lockScript.args
+          this.wallet.address = addresses[1].address
+          this.wallet.lockHash = addresses[1].lockHash
+          this.wallet.lockScript = addresses[1].lockScript
+          const lockArgs = addresses[1].lockScript.args
           const cells = await Rpc.getCells(lockArgs)
           this.loading = false
           if (cells && cells.length > 0) {
-            const summary = Utils.getSummary(cells)
-            this.wallet.free = Utils.formatCkb(summary.free)
-            this.wallet.capacity = Utils.formatCkb(summary.capacity)
+            this.summary = Utils.getSummary(cells)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { emptyCells } = Utils.groupCells(cells)
+            this.emptyCells = emptyCells as []
+            this.wallet.free = Utils.formatCkb(this.summary.free) as string
+            this.wallet.capacity = Utils.formatCkb(this.summary.capacity) as string
           }
         }
       } catch (error) {
@@ -105,16 +126,20 @@ export default defineComponent({
     },
     issue: async function (): Promise<any> {
       const rawTx: Transaction = Utils.getRawTxTemplate()
-      const outputCapacity = new BN(555)
-      rawTx.inputs.push({
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        previousOutput: {
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          txHash: Const.SUDT_TX_HASH,
-          index: "0x0"
-        },
-        since: "0x0"
-      })
+      const outputCapacity = new BN(142 * 100000000)
+      const freeOutputCapacity = new BN(this.summary.free)
+
+      const cells: Cell[] = this.emptyCells
+      for (const cell of cells) {
+        rawTx.inputs.push({
+          previousOutput: {
+            txHash: cell.out_point.tx_hash,
+            index: cell.out_point.index
+          },
+          since: '0x0'
+        })
+        rawTx.witnesses.push('0x')
+      }
 
       rawTx.outputs.push({
         capacity: `0x${outputCapacity.toString(16)}`,
@@ -128,6 +153,13 @@ export default defineComponent({
         }
       })
       rawTx.outputsData.push(Utils.textToHex(this.count))
+
+      rawTx.outputs.push({
+        capacity: `0x${freeOutputCapacity.sub(outputCapacity).toString(16)}`,
+        lock: this.wallet.lockScript,
+        type: null
+      })
+      rawTx.outputsData.push("0x")
 
       const authToken: string | null = window.localStorage.getItem("authToken")
 

@@ -80,7 +80,7 @@ interface Transaction {
   headerDeps: Array<object>;
   inputs: Array<object>;
   outputs: Array<object>;
-  witnesses: Array<object>;
+  witnesses: Array<string | object>;
   outputsData: Array<string>;
 }
 const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHash: {}) => {

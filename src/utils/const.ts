@@ -1,8 +1,16 @@
 const KEYPERING_URL = 'http://localhost:3102'
 const SECP256K1_BLAKE160_CODE_HASH = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'
-const RICH_NODE_INDEXER_URL = 'http://localhost:8116'
-const SUDT_CODE_HASH = "0x3eb2781fedc31519da86c32c35cd8be93d26ed0771d773b36579d3ba4d013107"
-const SUDT_TX_HASH = "0x407388c4daf53ccc43653438a52bf6c6b60dec8298342dbb27b2270e1d4d427d"
+
+// devnet
+// const RICH_NODE_INDEXER_URL = 'http://localhost:8116'
+// const SUDT_CODE_HASH = "0x3eb2781fedc31519da86c32c35cd8be93d26ed0771d773b36579d3ba4d013107"
+// const SUDT_TX_HASH = "0x407388c4daf53ccc43653438a52bf6c6b60dec8298342dbb27b2270e1d4d427d"
+
+// testnet
+const RICH_NODE_INDEXER_URL = 'https://prototype.ckbapp.dev/testnet/indexer'
+const SUDT_CODE_HASH = "0x48dbf59b4c7ee1547238021b4869bceedf4eea6b43772e5d66ef8865b6ae7212"
+const SUDT_TX_HASH = "0xc1b2ae129fad7465aaa9acc9785f842ba3e6e8b8051d899defa89f5508a77958"
+
 const SUDT_HASH_TYPE = 'data'
 
 export default {

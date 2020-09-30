@@ -63,9 +63,20 @@ const textToHex = function(text: string) {
   return result
 }
 
+interface Cell {
+  output_data: string;
+}
+
+const groupCells = function(cells: Cell[]) {
+  return {
+    emptyCells: cells.filter(cell => !cell.output_data || cell.output_data === '0x')
+  }
+}
+
 export default {
   getSummary: getSummary,
   formatCkb: formatCkb,
   getRawTxTemplate: getRawTxTemplate,
-  textToHex: textToHex
+  textToHex: textToHex,
+  groupCells: groupCells
 }
