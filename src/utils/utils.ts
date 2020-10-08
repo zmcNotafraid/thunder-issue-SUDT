@@ -1,6 +1,6 @@
 import Const from "./const"
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { bytesToHex } = require('@nervosnetwork/ckb-sdk-utils')
+const { toUint64Le } = require('@nervosnetwork/ckb-sdk-utils')
 
 const getSummary = function (cells: Array<any>) {
   const inuse = cells
@@ -54,13 +54,11 @@ const getRawTxTemplate = function () {
   }
 }
 
-const textToHex = function(text: string) {
-  let result = text.trim()
-  if (result.startsWith('0x')) {
-    return result
-  }
-  result = bytesToHex(new TextEncoder().encode(result))
-  return result
+const toUint128Le = (uint128: string | bigint) => {
+  const val = (typeof uint128 === 'bigint' ? uint128.toString(16) : uint128.slice(2)).padStart(32, '0')
+  const viewRight = toUint64Le(`0x${val.slice(0, 16)}`).slice(2)
+  const viewLeft = toUint64Le(`0x${val.slice(16)}`).slice(2)
+  return `0x${viewLeft}${viewRight}`
 }
 
 interface Cell {
@@ -77,6 +75,6 @@ export default {
   getSummary: getSummary,
   formatCkb: formatCkb,
   getRawTxTemplate: getRawTxTemplate,
-  textToHex: textToHex,
-  groupCells: groupCells
+  groupCells: groupCells,
+  toUint128Le: toUint128Le
 }

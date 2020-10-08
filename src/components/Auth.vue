@@ -24,7 +24,7 @@
   <form>
     <label>UDT Count</label>
     <input type="number" v-model="count" />
-    <button @click.prevent="issue()">Issue</button>
+    <a-button type="primary" @click.prevent="issue()">Issue</a-button>
   </form>
 </template>
 
@@ -33,7 +33,6 @@ import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
 import Const from "../utils/const"
-import { v4 as uuidv4 } from "uuid"
 import BN from "bn.js"
 
 interface Wallet {
@@ -107,7 +106,9 @@ export default defineComponent({
             const { emptyCells } = Utils.groupCells(cells)
             this.emptyCells = emptyCells as []
             this.wallet.free = Utils.formatCkb(this.summary.free) as string
-            this.wallet.capacity = Utils.formatCkb(this.summary.capacity) as string
+            this.wallet.capacity = Utils.formatCkb(
+              this.summary.capacity
+            ) as string
           }
         }
       } catch (error) {
@@ -127,6 +128,7 @@ export default defineComponent({
     issue: async function (): Promise<any> {
       const rawTx: Transaction = Utils.getRawTxTemplate()
       const outputCapacity = new BN(142 * 100000000)
+      const fee = new BN(0.1 * 100000000)
       const freeOutputCapacity = new BN(this.summary.free)
 
       const cells: Cell[] = this.emptyCells
@@ -136,9 +138,9 @@ export default defineComponent({
             txHash: cell.out_point.tx_hash,
             index: cell.out_point.index
           },
-          since: '0x0'
+          since: "0x0"
         })
-        rawTx.witnesses.push('0x')
+        rawTx.witnesses.push("0x")
       }
 
       rawTx.outputs.push({
@@ -149,13 +151,14 @@ export default defineComponent({
           codeHash: Const.SUDT_CODE_HASH,
           // eslint-disable-next-line @typescript-eslint/camelcase
           hashType: Const.SUDT_HASH_TYPE,
-          args: Utils.textToHex(uuidv4())
+          args: this.wallet.lockHash
         }
       })
-      rawTx.outputsData.push(Utils.textToHex(this.count))
+      // eslint-disable-next-line no-undef
+      rawTx.outputsData.push(Utils.toUint128Le(BigInt(this.count)))
 
       rawTx.outputs.push({
-        capacity: `0x${freeOutputCapacity.sub(outputCapacity).toString(16)}`,
+        capacity: `0x${freeOutputCapacity.sub(outputCapacity).sub(fee).toString(16)}`,
         lock: this.wallet.lockScript,
         type: null
       })
