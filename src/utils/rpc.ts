@@ -114,9 +114,8 @@ const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHas
   }
 }
 export default {
-  requestAuth: requestAuth,
-  queryAddresses: queryAddresses,
-  getCells: getCells,
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  sign_and_send_transaction: signAndSendTransaction
+  requestAuth,
+  queryAddresses,
+  getCells,
+  signAndSendTransaction
 }

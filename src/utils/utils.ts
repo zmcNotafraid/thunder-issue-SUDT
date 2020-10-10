@@ -1,8 +1,8 @@
 import Const from "./const"
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { toUint64Le } = require('@nervosnetwork/ckb-sdk-utils')
+import CkbSdkUtils from '@nervosnetwork/ckb-sdk-utils/lib/convertors'
+import { Cell } from '../interface/index'
 
-const getSummary = function (cells: Array<any>) {
+const getSummary = function (cells: Array<Cell>) {
   const inuse = cells
     .filter(cell => cell.output_data !== '0x')
     .map(cell => parseInt(cell.output.capacity))
@@ -56,25 +56,21 @@ const getRawTxTemplate = function () {
 
 const toUint128Le = (uint128: string | bigint) => {
   const val = (typeof uint128 === 'bigint' ? uint128.toString(16) : uint128.slice(2)).padStart(32, '0')
-  const viewRight = toUint64Le(`0x${val.slice(0, 16)}`).slice(2)
-  const viewLeft = toUint64Le(`0x${val.slice(16)}`).slice(2)
+  const viewRight = CkbSdkUtils.toUint64Le(`0x${val.slice(0, 16)}`).slice(2)
+  const viewLeft = CkbSdkUtils.toUint64Le(`0x${val.slice(16)}`).slice(2)
   return `0x${viewLeft}${viewRight}`
 }
 
-interface Cell {
-  output_data: string;
-}
-
-const groupCells = function(cells: Cell[]) {
+const filterEmptyCells = function(cells: Cell[]) {
   return {
     emptyCells: cells.filter(cell => !cell.output_data || cell.output_data === '0x')
   }
 }
 
 export default {
-  getSummary: getSummary,
-  formatCkb: formatCkb,
-  getRawTxTemplate: getRawTxTemplate,
-  groupCells: groupCells,
-  toUint128Le: toUint128Le
+  getSummary,
+  formatCkb,
+  getRawTxTemplate,
+  filterEmptyCells,
+  toUint128Le
 }
