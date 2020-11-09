@@ -30,3 +30,10 @@ export interface Cell {
     index: string;
   };
 }
+
+export type ScriptHashType = 'data' | 'type'
+export interface RpcScript {
+  code_hash: string;
+  hash_type: 'data' | 'type';
+  args: string;
+}

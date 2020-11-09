@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="UDT Count">
-      <a-input v-model:value="form.count" type="number" />
+      <a-input v-model:value="form.count" type="number" value='100000000' />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -15,8 +15,7 @@
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
-import Const from "../utils/const"
-import BN from "bn.js"
+import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
 import { Transaction, Cell } from '../interface/index'
 
 export default defineComponent({
@@ -32,9 +31,9 @@ export default defineComponent({
   methods: {
     onSubmit: async function(): Promise<any> {
       const rawTx: Transaction = Utils.getRawTxTemplate()
-      const outputCapacity = new BN(142 * 100000000)
-      const fee = new BN(0.1 * 100000000)
-      const freeOutputCapacity = new BN(Number(window.localStorage.getItem("free")))
+      const outputCapacity = BigInt(142 * 10 ** 8)
+      const fee = BigInt(1000)
+      const freeOutputCapacity = BigInt(window.localStorage.getItem("free"))
 
       const cells: Cell[] = JSON.parse(window.localStorage.getItem("emptyCells") as string)
       for (const cell of cells) {
@@ -53,17 +52,17 @@ export default defineComponent({
         lock: JSON.parse(window.localStorage.getItem("lockScript") as string),
         type: {
           // eslint-disable-next-line @typescript-eslint/camelcase
-          codeHash: Const.SUDT_CODE_HASH,
+          codeHash: SUDT_CODE_HASH,
           // eslint-disable-next-line @typescript-eslint/camelcase
-          hashType: Const.SUDT_HASH_TYPE,
+          hashType: SUDT_HASH_TYPE,
           args: window.localStorage.getItem("lockHash")
         }
       })
       // eslint-disable-next-line no-undef
-      rawTx.outputsData.push(Utils.toUint128Le(BigInt(this.form.count)))
+      rawTx.outputsData.push(Utils.toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
 
       rawTx.outputs.push({
-        capacity: `0x${freeOutputCapacity.sub(outputCapacity).sub(fee).toString(16)}`,
+        capacity: `0x${(freeOutputCapacity - outputCapacity - fee).toString(16)}`,
         lock: JSON.parse(window.localStorage.getItem("lockScript") as string),
         type: null
       })

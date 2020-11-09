@@ -1,8 +1,9 @@
-import Const from './const'
+import { KEYPERING_URL, RICH_NODE_INDEXER_URL } from './const'
+import { RpcScript } from '../interface'
 
-const requestAuth = async (description: any): Promise<any> => {
+const requestAuth = async (description: string): Promise<any> => {
   try {
-    const response = await fetch(Const.KEYPERING_URL, {
+    const response = await fetch(KEYPERING_URL, {
       method: 'POST',
       body: JSON.stringify({
         id: 2,
@@ -22,7 +23,7 @@ const requestAuth = async (description: any): Promise<any> => {
 
 const queryAddresses = async (token: string): Promise<any> => {
   try {
-    const response = await fetch(Const.KEYPERING_URL, {
+    const response = await fetch(KEYPERING_URL, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
@@ -40,20 +41,15 @@ const queryAddresses = async (token: string): Promise<any> => {
   }
 }
 
-const getCells = async (lockArgs: string): Promise<any> => {
+const getCells = async (scriptType: 'lock' | 'type', script: RpcScript): Promise<any> => {
   const payload = {
     id: 1,
     jsonrpc: '2.0',
     method: 'get_cells',
     params: [
       {
-        script: {
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          code_hash: Const.SECP256K1_BLAKE160_CODE_HASH,
-          hash_type: 'type', // eslint-disable-line @typescript-eslint/camelcase
-          args: lockArgs
-        },
-        script_type: 'lock' // eslint-disable-line @typescript-eslint/camelcase
+        script: script,
+        script_type: scriptType // eslint-disable-line @typescript-eslint/camelcase
       },
       'asc',
       '0x3e8'
@@ -61,7 +57,7 @@ const getCells = async (lockArgs: string): Promise<any> => {
   }
   const body = JSON.stringify(payload, null, '  ')
   try {
-    const response = await fetch(Const.RICH_NODE_INDEXER_URL, {
+    const response = await fetch(RICH_NODE_INDEXER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -91,7 +87,7 @@ const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHas
     outputType: ''
   }
   try {
-    const res = await fetch(Const.KEYPERING_URL, {
+    const res = await fetch(KEYPERING_URL, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
@@ -108,6 +104,7 @@ const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHas
       })
     })
     const response = await res.json()
+    console.info(response)
     return response.result
   } catch (error) {
     console.error('error', error)

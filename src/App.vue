@@ -17,10 +17,16 @@
             <router-link to="/"> Wallet Auth </router-link>
           </span>
         </a-menu-item>
-        <a-menu-item key="1">
+        <a-menu-item key="2">
           <home-outlined />
           <span class="nav-text">
             <router-link to="/issue">Issue Token</router-link>
+          </span>
+        </a-menu-item>
+        <a-menu-item key="3">
+          <home-outlined />
+          <span class="nav-text">
+            <router-link to="/transfer">Transfer Token</router-link>
           </span>
         </a-menu-item>
       </a-menu>
@@ -40,6 +46,7 @@
 </template>
 
 <script lang="ts">
+import 'ant-design-vue/dist/antd.css'
 import { Options, Vue } from "vue-class-component"
 import { HomeOutlined, ThunderboltOutlined } from "@ant-design/icons-vue"
 

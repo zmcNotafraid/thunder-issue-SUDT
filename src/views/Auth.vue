@@ -33,7 +33,8 @@
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
-import { Wallet } from "../interface/index"
+import { RpcScript, Wallet } from "../interface/index"
+import { SECP256K1_BLAKE160_CODE_HASH } from '../utils/const'
 
 export default defineComponent({
   data() {
@@ -82,8 +83,13 @@ export default defineComponent({
             "lockScript",
             JSON.stringify(this.wallet.lockScript || {})
           )
-          const lockArgs = defaultAddress.lockScript.args
-          const cells = await Rpc.getCells(lockArgs)
+          const lockScript: RpcScript = {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            code_hash: SECP256K1_BLAKE160_CODE_HASH,
+            hash_type: 'type', // eslint-disable-line @typescript-eslint/camelcase
+            args: defaultAddress.lockScript.args
+          }
+          const cells = await Rpc.getCells('lock', lockScript)
           this.loading = false
           if (cells && cells.length > 0) {
             this.summary = Utils.getSummary(cells)

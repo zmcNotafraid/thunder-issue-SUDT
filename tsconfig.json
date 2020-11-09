@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,19 +20,14 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "jest"
+      "jest",
+      "node"
     ],
     "paths": {
       "@/*": [
         "src/*"
       ]
-    },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    }
   },
   "include": [
     "src/**/*.ts",
