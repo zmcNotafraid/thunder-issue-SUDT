@@ -1,10 +1,7 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="To Address">
-      <a-input v-model:value="form.toAddress" />
-    </a-form-item>
-    <a-form-item label="Transfer Count">
-      <a-input v-model:value="form.transferCount" type="number" />
+    <a-form-item label="Burn Count">
+      <a-input v-model:value="form.burnCount" type="number" />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -26,8 +23,7 @@ export default defineComponent({
   data() {
     return {
       form: {
-        toAddress: '',
-        transferCount: "0"
+        burnCount: "0"
       },
       labelCol: { span: 4 },
       wrapperCol: { span: 10 }
@@ -35,7 +31,6 @@ export default defineComponent({
   },
   methods: {
     onSubmit: async function(): Promise<any> {
-      const toLockScript = addressToScript(this.form.toAddress)
       const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
       const sudtTypeScript: CKBComponents.Script = {
         codeHash: SUDT_CODE_HASH,
@@ -45,7 +40,7 @@ export default defineComponent({
       const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
       const fromLockLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(fromLockScript))
       const fromTypeLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))
-      if (fromTypeLiveCells.length === 0 || fromLockLiveCells.length === 0) {
+      if (fromTypeLiveCells.length === 0) {
         return
       }
 
@@ -60,7 +55,6 @@ export default defineComponent({
         since: "0x0"
       })
       rawTx.witnesses.push("0x")
-
       rawTx.inputs.push({
         previousOutput: {
           txHash: biggestFromLockCell.out_point.tx_hash,
@@ -71,19 +65,12 @@ export default defineComponent({
       rawTx.witnesses.push("0x")
 
       rawTx.outputs.push({
-        capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
-        lock: toLockScript,
-        type: sudtTypeScript
-      })
-      rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
-
-      rawTx.outputs.push({
         capacity: `0x${(BigInt(lastTypeCell.output.capacity)).toString(16)}`,
         lock: Utils.camelCaseScriptKey(lastTypeCell.output.lock),
         type: sudtTypeScript
       })
       const originalSudtCount = BigInt('0x' + Utils.readBigUInt128LE(lastTypeCell.output_data.slice(2, 34)))
-      const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** 8))
+      const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** 8))
       rawTx.outputsData.push('0x' + Utils.toUint128Le(restSudtCount))
 
       rawTx.outputs.push({

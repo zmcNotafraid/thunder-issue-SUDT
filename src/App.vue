@@ -29,6 +29,13 @@
             <router-link to="/transfer">Transfer Token</router-link>
           </span>
         </a-menu-item>
+        <a-menu-item key="4">
+          <home-outlined />
+          <span class="nav-text">
+            <router-link to="/burn">Burn Token</router-link>
+          </span>
+        </a-menu-item>
+
       </a-menu>
     </a-layout-sider>
     <a-layout>
