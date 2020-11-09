@@ -1,3 +1,4 @@
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { KEYPERING_URL, RICH_NODE_INDEXER_URL } from './const'
 import { RpcScript } from '../interface'
 
@@ -49,7 +50,7 @@ const getCells = async (scriptType: 'lock' | 'type', script: RpcScript): Promise
     params: [
       {
         script: script,
-        script_type: scriptType // eslint-disable-line @typescript-eslint/camelcase
+        script_type: scriptType
       },
       'asc',
       '0x3e8'
@@ -70,17 +71,9 @@ const getCells = async (scriptType: 'lock' | 'type', script: RpcScript): Promise
     console.error('error', error)
   }
 }
-interface Transaction {
-  version: string;
-  cellDeps: Array<object>;
-  headerDeps: Array<object>;
-  inputs: Array<object>;
-  outputs: Array<object>;
-  witnesses: Array<string | object>;
-  outputsData: Array<string>;
-}
-const signAndSendTransaction = async (rawTx: Transaction, token: string, lockHash: {}) => {
-  const rawTransaction: Transaction = rawTx
+
+const signAndSendTransaction = async (rawTx: CKBComponents.RawTransactionToSign, token: string, lockHash: string) => {
+  const rawTransaction: CKBComponents.RawTransactionToSign = rawTx
   rawTransaction.witnesses[0] = {
     lock: '',
     inputType: '',

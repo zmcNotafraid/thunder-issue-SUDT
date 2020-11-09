@@ -39,7 +39,7 @@ const formatCkb = function (value: number): string | undefined {
   return integerStr + '.' + fractionStr
 }
 
-const getRawTxTemplate = function () {
+const getRawTxTemplate = function (): CKBComponents.RawTransactionToSign {
   return {
     version: '0x0',
     cellDeps: [
@@ -76,7 +76,6 @@ export const readBigUInt128LE = (rawHexString: string) => {
 }
 
 export const lowerScriptKey = (ckbScript: CKBComponents.Script) => {
-  // eslint-disable-next-line @typescript-eslint/camelcase
   return { code_hash: ckbScript.codeHash, hash_type: ckbScript.hashType, args: ckbScript.args }
 }
 

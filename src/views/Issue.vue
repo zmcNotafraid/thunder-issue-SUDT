@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="UDT Count">
-      <a-input v-model:value="form.count" type="number" value='100000000' />
+      <a-input v-model="form.count" type="number" value='100000000' />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -12,11 +12,12 @@
 </template>
 
 <script lang='ts'>
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
 import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
-import { Transaction, Cell } from '../interface/index'
+import { Cell } from '../interface/index'
 
 export default defineComponent({
   data() {
@@ -30,7 +31,7 @@ export default defineComponent({
   },
   methods: {
     onSubmit: async function(): Promise<any> {
-      const rawTx: Transaction = Utils.getRawTxTemplate()
+      const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
       const outputCapacity = BigInt(142 * 10 ** 8)
       const fee = BigInt(1000)
       const freeOutputCapacity = BigInt(window.localStorage.getItem("free"))
@@ -51,11 +52,9 @@ export default defineComponent({
         capacity: `0x${outputCapacity.toString(16)}`,
         lock: JSON.parse(window.localStorage.getItem("lockScript") as string),
         type: {
-          // eslint-disable-next-line @typescript-eslint/camelcase
           codeHash: SUDT_CODE_HASH,
-          // eslint-disable-next-line @typescript-eslint/camelcase
           hashType: SUDT_HASH_TYPE,
-          args: window.localStorage.getItem("lockHash")
+          args: window.localStorage.getItem("lockHash") || ''
         }
       })
       // eslint-disable-next-line no-undef

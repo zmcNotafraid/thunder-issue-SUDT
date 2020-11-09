@@ -1,31 +1,18 @@
 export interface Wallet {
-  lockScript: {};
+  lockScript: CKBComponents.Script;
   address: string;
   free: string;
   capacity: string;
   lockHash: string;
 }
 
-export interface Transaction {
-  version: string;
-  cellDeps: Array<object>;
-  headerDeps: Array<object>;
-  inputs: Array<object>;
-  outputs: Array<object>;
-  witnesses: Array<string | object>;
-  outputsData: Array<string>;
-}
-
-interface CellOutput {
-  capacity: string;
-  lockScript: object;
-  typeScript: object;
-}
-
 export interface Cell {
-  output: CellOutput;
+  output: CKBComponents.CellOutput;
+  // eslint-disable-next-line camelcase
   output_data: string;
+  // eslint-disable-next-line camelcase
   out_point: {
+  // eslint-disable-next-line camelcase
     tx_hash: string;
     index: string;
   };
@@ -33,7 +20,9 @@ export interface Cell {
 
 export type ScriptHashType = 'data' | 'type'
 export interface RpcScript {
+  // eslint-disable-next-line camelcase
   code_hash: string;
+  // eslint-disable-next-line camelcase
   hash_type: 'data' | 'type';
   args: string;
 }

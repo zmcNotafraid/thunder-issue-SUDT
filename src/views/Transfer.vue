@@ -15,12 +15,12 @@
 </template>
 
 <script lang='ts'>
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { addressToScript } from '@nervosnetwork/ckb-sdk-utils/lib/'
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
 import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
-import { Transaction } from '../interface/index'
 
 export default defineComponent({
   data() {
@@ -42,7 +42,7 @@ export default defineComponent({
         hashType: SUDT_HASH_TYPE,
         args: window.localStorage.getItem("lockHash")!
       }
-      const rawTx: Transaction = Utils.getRawTxTemplate()
+      const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
       // const toLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(toLockScript))
       const fromLockLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(fromLockScript))
       const fromTypeLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))

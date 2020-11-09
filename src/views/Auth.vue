@@ -12,7 +12,6 @@
     </a-col>
   </a-row>
   <a-form
-    :layout="inline"
     :model="wallet"
     :label-col="labelCol"
     :wrapper-col="wrapperCol"
@@ -84,9 +83,8 @@ export default defineComponent({
             JSON.stringify(this.wallet.lockScript || {})
           )
           const lockScript: RpcScript = {
-            // eslint-disable-next-line @typescript-eslint/camelcase
             code_hash: SECP256K1_BLAKE160_CODE_HASH,
-            hash_type: 'type', // eslint-disable-line @typescript-eslint/camelcase
+            hash_type: 'type',
             args: defaultAddress.lockScript.args
           }
           const cells = await Rpc.getCells('lock', lockScript)
@@ -94,7 +92,6 @@ export default defineComponent({
           if (cells && cells.length > 0) {
             this.summary = Utils.getSummary(cells)
             window.localStorage.setItem("free", this.summary.free.toString())
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { emptyCells } = Utils.filterEmptyCells(cells)
             this.emptyCells = emptyCells as []
             window.localStorage.setItem(
