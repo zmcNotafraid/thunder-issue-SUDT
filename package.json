@@ -6,7 +6,7 @@
     "node": ">=12 <13"
   },
   "scripts": {
-    "serve": "vue-cli-service serve --inspect",
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"

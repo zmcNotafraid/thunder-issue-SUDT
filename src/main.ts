@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import 'moment'
-import 'ant-design-vue/dist/antd.css'
 import { Layout, Menu, Button, Form, Input, Row, Col } from 'ant-design-vue'
 
 const app = createApp(App)
