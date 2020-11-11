@@ -70,17 +70,23 @@ const filterEmptyCells = function(cells: Cell[]) {
   }
 }
 
-export const readBigUInt128LE = (rawHexString: string) => {
+const readBigUInt128LE = (rawHexString: string) => {
   const buf = Buffer.from(rawHexString, 'hex')
   return buf.reverse().toString('hex')
 }
 
-export const lowerScriptKey = (ckbScript: CKBComponents.Script) => {
+const lowerScriptKey = (ckbScript: CKBComponents.Script) => {
   return { code_hash: ckbScript.codeHash, hash_type: ckbScript.hashType, args: ckbScript.args }
 }
 
-export const camelCaseScriptKey = (ckbScript: RpcScript): CKBComponents.Script => {
+const camelCaseScriptKey = (ckbScript: RpcScript): CKBComponents.Script => {
   return { codeHash: ckbScript.code_hash, hashType: ckbScript.hash_type, args: ckbScript.args }
+}
+
+const compareLockScript = (lockScript1: RpcScript, lockScript2: RpcScript) => {
+  return lockScript1.args === lockScript2.args &&
+    lockScript1.code_hash === lockScript2.code_hash &&
+    lockScript1.hash_type === lockScript2.hash_type
 }
 
 export default {
@@ -91,5 +97,6 @@ export default {
   toUint128Le,
   readBigUInt128LE,
   lowerScriptKey,
-  camelCaseScriptKey
+  camelCaseScriptKey,
+  compareLockScript
 }

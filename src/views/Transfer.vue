@@ -44,18 +44,22 @@ export default defineComponent({
       }
       const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
       const fromLockLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(fromLockScript))
-      const fromTypeLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))
-      if (fromTypeLiveCells.length === 0 || fromLockLiveCells.length === 0) {
+      const sudtLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))
+      if (sudtLiveCells.length === 0 || fromLockLiveCells.length === 0) {
         return
       }
 
-      const lastTypeCell = fromTypeLiveCells.sort((cell1: any, cell2: any) => Number(parseInt(cell2.block_number) - parseInt(cell1.block_number)))[0]
       const biggestFromLockCell = fromLockLiveCells.sort((cell1: any, cell2: any) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
+      const fromSudtLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
+      if (fromLockLiveCells.length === 0) {
+        return
+      }
+      const fromSudtCell = fromSudtLiveCells[0]
 
       rawTx.inputs.push({
         previousOutput: {
-          txHash: lastTypeCell.out_point.tx_hash,
-          index: lastTypeCell.out_point.index
+          txHash: fromSudtCell.out_point.tx_hash,
+          index: fromSudtCell.out_point.index
         },
         since: "0x0"
       })
@@ -78,17 +82,17 @@ export default defineComponent({
       rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(lastTypeCell.output.capacity)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(lastTypeCell.output.lock),
+        capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
+        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
         type: sudtTypeScript
       })
-      const originalSudtCount = BigInt('0x' + Utils.readBigUInt128LE(lastTypeCell.output_data.slice(2, 34)))
+      const originalSudtCount = BigInt('0x' + Utils.readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
       const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** 8))
       rawTx.outputsData.push('0x' + Utils.toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
         capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(10000) - BigInt(142 * 10 ** 8)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(lastTypeCell.output.lock),
+        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
         type: biggestFromLockCell.output.type
       })
       rawTx.outputsData.push(biggestFromLockCell.output_data)
