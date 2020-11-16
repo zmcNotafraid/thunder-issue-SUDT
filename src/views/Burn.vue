@@ -13,7 +13,6 @@
 
 <script lang='ts'>
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { addressToScript } from '@nervosnetwork/ckb-sdk-utils/lib/'
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"

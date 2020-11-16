@@ -92,7 +92,11 @@ const signAndSendTransaction = async (rawTx: CKBComponents.RawTransactionToSign,
         params: {
           tx: rawTransaction,
           description: "Transaction",
-          lockHash: lockHash
+          lockHash: lockHash,
+          inputSignConfig: {
+            index: 0,
+            length: 2
+          }
         }
       })
     })

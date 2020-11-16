@@ -6,6 +6,9 @@
     <a-form-item label="Transfer Count">
       <a-input v-model:value="form.transferCount" type="number" />
     </a-form-item>
+    <a-form-item label="ACP">
+      <a-checkbox v-model:checked="form.acp"  />
+    </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
         Submit
@@ -20,14 +23,16 @@ import { addressToScript } from '@nervosnetwork/ckb-sdk-utils/lib/'
 import { defineComponent } from "vue"
 import Rpc from "../utils/rpc"
 import Utils from "../utils/utils"
-import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
+import { SUDT_CODE_HASH, SUDT_HASH_TYPE, ACP_CODE_HASH, ACP_HASH_TYPE, ACP_TX_HASH } from "../utils/const"
+import { RpcScript } from '@/interface'
 
 export default defineComponent({
   data() {
     return {
       form: {
         toAddress: '',
-        transferCount: "0"
+        transferCount: "0",
+        acp: false
       },
       labelCol: { span: 4 },
       wrapperCol: { span: 10 }
@@ -35,7 +40,6 @@ export default defineComponent({
   },
   methods: {
     onSubmit: async function(): Promise<any> {
-      const toLockScript = addressToScript(this.form.toAddress)
       const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
       const sudtTypeScript: CKBComponents.Script = {
         codeHash: SUDT_CODE_HASH,
@@ -49,21 +53,12 @@ export default defineComponent({
         return
       }
 
-      const biggestFromLockCell = fromLockLiveCells.sort((cell1: any, cell2: any) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
+      const biggestFromLockCell = fromLockLiveCells.sort((cell1: any, cell2: any) => { return Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)) })[0]
       const fromSudtLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
       if (fromLockLiveCells.length === 0) {
         return
       }
-      const fromSudtCell = fromSudtLiveCells[0]
-
-      rawTx.inputs.push({
-        previousOutput: {
-          txHash: fromSudtCell.out_point.tx_hash,
-          index: fromSudtCell.out_point.index
-        },
-        since: "0x0"
-      })
-      rawTx.witnesses.push("0x")
+      const fromSudtCell = fromSudtLiveCells.sort((cell1: any, cell2: any) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
 
       rawTx.inputs.push({
         previousOutput: {
@@ -74,13 +69,65 @@ export default defineComponent({
       })
       rawTx.witnesses.push("0x")
 
-      rawTx.outputs.push({
-        capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
-        lock: toLockScript,
-        type: sudtTypeScript
+      rawTx.inputs.push({
+        previousOutput: {
+          txHash: fromSudtCell.out_point.tx_hash,
+          index: fromSudtCell.out_point.index
+        },
+        since: "0x0"
       })
-      rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
+      rawTx.witnesses.push("0x")
 
+      const toLockScript = addressToScript(this.form.toAddress)
+      const toAcpScript: RpcScript = {
+        code_hash: ACP_CODE_HASH,
+        hash_type: ACP_HASH_TYPE,
+        args: toLockScript.args
+      }
+
+      const toSudtAcpLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, toAcpScript) })
+      if (this.form.acp === true) {
+        rawTx.cellDeps.push(
+          {
+            outPoint: {
+              txHash: ACP_TX_HASH,
+              index: '0x0'
+            },
+            depType: 'depGroup'
+          }
+        )
+        if (toSudtAcpLiveCells.length > 0) {
+          rawTx.inputs.push({
+            previousOutput: {
+              txHash: toSudtAcpLiveCells[0].out_point.tx_hash,
+              index: toSudtAcpLiveCells[0].out_point.index
+            },
+            since: "0x0"
+          })
+          rawTx.witnesses.push("0x")
+          rawTx.outputs.push({
+            capacity: toSudtAcpLiveCells[0].output.capacity,
+            lock: Utils.camelCaseScriptKey(toAcpScript),
+            type: sudtTypeScript
+          })
+          const originalToSudtCount = Utils.readBigUInt128LE(toSudtAcpLiveCells[0].output_data.slice(2))
+          rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
+        } else {
+          rawTx.outputs.push({
+            capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
+            lock: Utils.camelCaseScriptKey(toAcpScript),
+            type: sudtTypeScript
+          })
+          rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
+        }
+      } else {
+        rawTx.outputs.push({
+          capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
+          lock: toLockScript,
+          type: sudtTypeScript
+        })
+        rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
+      }
       rawTx.outputs.push({
         capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
         lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
@@ -103,6 +150,7 @@ export default defineComponent({
         console.error("No auth token")
         return
       }
+
       await Rpc.signAndSendTransaction(
         rawTx,
         authToken,

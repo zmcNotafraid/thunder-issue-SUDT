@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="UDT Count">
-      <a-input v-model="form.count" type="number" value='100000000' />
+      <a-input v-model:value="form.count" type="number" />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -58,7 +58,7 @@ export default defineComponent({
         }
       })
       // eslint-disable-next-line no-undef
-      rawTx.outputsData.push(Utils.toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
+      rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
 
       rawTx.outputs.push({
         capacity: `0x${(freeOutputCapacity - outputCapacity - fee).toString(16)}`,
