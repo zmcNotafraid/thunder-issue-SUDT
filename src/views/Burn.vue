@@ -12,11 +12,23 @@
 </template>
 
 <script lang='ts'>
-import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { defineComponent } from "vue"
-import Rpc from "../utils/rpc"
-import Utils from "../utils/utils"
-import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
+import { getTransactionSize } from '@nervosnetwork/ckb-sdk-utils'
+import { message } from 'ant-design-vue'
+import {
+  getRawTxTemplate,
+  underscoreScriptKey,
+  getCells,
+  compareLockScript,
+  signAndSendTransaction,
+  camelCaseScriptKey,
+  readBigUInt128LE,
+  toUint128Le,
+  FEE_RATIO,
+  getBiggestCapacityCell
+} from "@/utils"
+import { UnderscoreCell } from '@/interface'
 
 export default defineComponent({
   data() {
@@ -29,26 +41,22 @@ export default defineComponent({
     }
   },
   methods: {
-    onSubmit: async function(): Promise<any> {
-      const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
-      const sudtTypeScript: CKBComponents.Script = {
-        codeHash: SUDT_CODE_HASH,
-        hashType: SUDT_HASH_TYPE,
-        args: window.localStorage.getItem("lockHash")!
-      }
-      const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
-      const fromLockLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(fromLockScript))
-      const sudtLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))
-      if (sudtLiveCells.length === 0 || fromLockLiveCells.length === 0) {
-        return
-      }
+    onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
+      const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
 
-      const biggestFromLockCell = fromLockLiveCells.sort((cell1: any, cell2: any) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
-      const fromSudtLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
-      if (fromLockLiveCells.length === 0) {
+      const biggestFromLockCell = await await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
+      if (biggestFromLockCell === undefined) {
+        message.error("No Live Cells!")
         return
       }
-      const fromSudtCell = fromSudtLiveCells[0]
+      const sudtTypeScript: CKBComponents.Script = {
+        codeHash: process.env.VUE_APP_SUDT_CODE_HASH || '',
+        hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
+        args: window.localStorage.getItem("lockHash") || ''
+      }
+      const sudtLiveCells = await getCells('type', underscoreScriptKey(sudtTypeScript))
+      const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
+      const fromSudtCell = fromSudtLiveCells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
 
       rawTx.inputs.push({
         previousOutput: {
@@ -69,19 +77,22 @@ export default defineComponent({
 
       rawTx.outputs.push({
         capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
+        lock: camelCaseScriptKey(fromSudtCell.output.lock),
         type: sudtTypeScript
       })
-      const originalSudtCount = BigInt('0x' + Utils.readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
+      const originalSudtCount = BigInt('0x' + readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
       const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** 8))
-      rawTx.outputsData.push('0x' + Utils.toUint128Le(restSudtCount))
+      rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(10000) - BigInt(142 * 10 ** 8)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
-        type: biggestFromLockCell.output.type
+        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(142 * 10 ** 8)).toString(16)}`,
+        lock: camelCaseScriptKey(fromSudtCell.output.lock),
+        type: biggestFromLockCell.output.type === null ? biggestFromLockCell.output.type : camelCaseScriptKey(biggestFromLockCell.output.type)
       })
       rawTx.outputsData.push(biggestFromLockCell.output_data)
+
+      const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
+      rawTx.outputs[1].capacity = '0x' + (BigInt(rawTx.outputs[1].capacity) - minerFee).toString(16)
 
       const authToken: string | null = window.localStorage.getItem("authToken")
 
@@ -89,11 +100,17 @@ export default defineComponent({
         console.error("No auth token")
         return
       }
-      await Rpc.signAndSendTransaction(
-        rawTx,
-        authToken,
-        window.localStorage.getItem("lockHash") as string
-      )
+      try {
+        const response = await signAndSendTransaction(
+          rawTx,
+          authToken,
+          window.localStorage.getItem("lockHash") as string
+        )
+        console.info(response)
+        message.success(`TX: ${response.txHash}`, 10)
+      } catch (error) {
+        message.error(error)
+      }
     }
   }
 })

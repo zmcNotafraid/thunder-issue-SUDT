@@ -30,10 +30,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import Rpc from "../utils/rpc"
-import Utils from "../utils/utils"
-import { RpcScript, Wallet } from "../interface/index"
-import { SECP256K1_BLAKE160_CODE_HASH } from '../utils/const'
+import { message } from 'ant-design-vue'
+import {
+  getCells,
+  queryAddresses,
+  requestAuth,
+  SECP256K1_BLAKE160_CODE_HASH,
+  calCapacityAmount,
+  formatCkb
+} from "@/utils"
+import { UnderscoreScript, Account, AccountList } from "../interface/index"
 
 export default defineComponent({
   data() {
@@ -41,81 +47,73 @@ export default defineComponent({
       wallet: {
         address: "",
         free: "0",
-        capacity: "0",
-        lockHash: "",
-        lockScript: {}
-      } as Wallet,
-      summary: {
-        free: 0,
-        capacity: 0
+        capacity: "0"
       },
-      form: {
-        count: "0"
-      },
-      labelCol: { span: 4 },
-      wrapperCol: { span: 14 },
-      loading: false,
-      emptyCells: []
+      labelCol: { span: 6 },
+      wrapperCol: { span: 12 },
+      loading: false
     }
   },
   methods: {
-    // annotation
-    reload: async function (): Promise<any> {
+    reload: async function (): Promise<undefined> {
+      this.loading = true
+
       const authToken = window.localStorage.getItem("authToken")
       if (!authToken) {
-        console.error("No auth token")
+        message.error("No auth token")
+        this.loading = false
         return
       }
-      this.loading = true
+
       try {
-        const addresses = (await Rpc.queryAddresses(authToken)).addresses
-        if (addresses && addresses.length > 0) {
-          const defaultAddress = addresses.filter(
-            (address: { lockScriptMeta: { name: string } }) =>
-              address.lockScriptMeta.name === "Secp256k1"
-          )[0]
-          this.wallet.address = defaultAddress.address
-          this.wallet.lockHash = defaultAddress.lockHash
-          this.wallet.lockScript = defaultAddress.lockScript
-          window.localStorage.setItem("lockHash", this.wallet.lockHash)
-          window.localStorage.setItem(
-            "lockScript",
-            JSON.stringify(this.wallet.lockScript || {})
-          )
-          const lockScript: RpcScript = {
-            code_hash: SECP256K1_BLAKE160_CODE_HASH,
-            hash_type: 'type',
-            args: defaultAddress.lockScript.args
-          }
-          const cells = await Rpc.getCells('lock', lockScript)
+        const results: AccountList = await queryAddresses(authToken)
+        const addresses: Array<Account> = results.addresses
+        const address = addresses.filter(
+          (address: Account) =>
+            address.lockScriptMeta.name === "Secp256k1"
+        )
+        if (address.length === 0) {
           this.loading = false
-          if (cells && cells.length > 0) {
-            this.summary = Utils.getSummary(cells)
-            window.localStorage.setItem("free", this.summary.free.toString())
-            const { emptyCells } = Utils.filterEmptyCells(cells)
-            this.emptyCells = emptyCells as []
-            window.localStorage.setItem(
-              "emptyCells",
-              JSON.stringify(this.emptyCells)
-            )
-            this.wallet.free = Utils.formatCkb(this.summary.free) as string
-            this.wallet.capacity = Utils.formatCkb(
-              this.summary.capacity
-            ) as string
-          }
+          message.error("No Secp256k1 address")
+          return
         }
+
+        const defaultAddress = address[0]
+        this.wallet.address = defaultAddress.address
+        window.localStorage.setItem("lockHash", defaultAddress.lockHash)
+
+        const lockScript: UnderscoreScript = {
+          code_hash: SECP256K1_BLAKE160_CODE_HASH,
+          hash_type: 'type',
+          args: defaultAddress.lockScript.args
+        }
+        window.localStorage.setItem(
+          "lockScript",
+          JSON.stringify(lockScript || {})
+        )
+
+        const cells = await getCells('lock', lockScript)
+        if (cells.length === 0) {
+          this.loading = false
+          message.error("No avaiable cells")
+          return
+        }
+        const summary = calCapacityAmount(cells)
+        this.wallet.free = summary.free.toString()
+        this.wallet.capacity = formatCkb(summary.capacity) || "0"
+        message.success("Auth Success!")
       } catch (error) {
-        console.error(error)
-        this.loading = false
+        message.error(error)
       }
+      this.loading = false
     },
-    getAuth: async function (): Promise<any> {
+    getAuth: async function (): Promise<void> {
       try {
-        const token = await Rpc.requestAuth("Simplest DApp")
+        const token = await requestAuth("Simplest DApp")
         window.localStorage.setItem("authToken", token)
         await this.reload()
       } catch (error) {
-        console.error(error)
+        message.error(error)
       }
     }
   }

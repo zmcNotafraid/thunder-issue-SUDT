@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="UDT Count">
-      <a-input v-model:value="form.count" type="number" />
+      <a-input v-model:value="form.count" type="number" min="1" step="1" />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -12,12 +12,19 @@
 </template>
 
 <script lang='ts'>
-import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { defineComponent } from "vue"
-import Rpc from "../utils/rpc"
-import Utils from "../utils/utils"
-import { SUDT_CODE_HASH, SUDT_HASH_TYPE } from "../utils/const"
-import { Cell } from '../interface/index'
+import { message } from 'ant-design-vue'
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
+import { getTransactionSize } from '@nervosnetwork/ckb-sdk-utils'
+import {
+  getRawTxTemplate,
+  signAndSendTransaction,
+  toUint128Le,
+  getBiggestCapacityCell,
+  FEE_RATIO,
+  camelCaseScriptKey
+} from "@/utils"
+import { UnderscoreCell } from '../interface/index'
 
 export default defineComponent({
   data() {
@@ -30,54 +37,59 @@ export default defineComponent({
     }
   },
   methods: {
-    onSubmit: async function(): Promise<any> {
-      const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
-      const outputCapacity = BigInt(142 * 10 ** 8)
-      const fee = BigInt(1000)
-      const freeOutputCapacity = BigInt(window.localStorage.getItem("free"))
+    onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
+      const authToken: string | null = window.localStorage.getItem("authToken")
 
-      const cells: Cell[] = JSON.parse(window.localStorage.getItem("emptyCells") as string)
-      for (const cell of cells) {
-        rawTx.inputs.push({
-          previousOutput: {
-            txHash: cell.out_point.tx_hash,
-            index: cell.out_point.index
-          },
-          since: "0x0"
-        })
-        rawTx.witnesses.push("0x")
+      if (!authToken) {
+        message.error("No auth token")
+        return
       }
+      const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
+      const cell: UnderscoreCell = await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
+      const sudtCapacity = BigInt(142 * 10 ** 8)
+      const restCapacity = BigInt(cell.output.capacity) - sudtCapacity
+
+      rawTx.inputs.push({
+        previousOutput: {
+          txHash: cell.out_point.tx_hash,
+          index: cell.out_point.index
+        },
+        since: "0x0"
+      })
+      rawTx.witnesses.push("0x")
 
       rawTx.outputs.push({
-        capacity: `0x${outputCapacity.toString(16)}`,
-        lock: JSON.parse(window.localStorage.getItem("lockScript") as string),
+        capacity: `0x${(restCapacity).toString(16)}`,
+        lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
+        type: null
+      })
+      rawTx.outputsData.push('0x')
+
+      rawTx.outputs.push({
+        capacity: `0x${sudtCapacity.toString(16)}`,
+        lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
         type: {
-          codeHash: SUDT_CODE_HASH,
-          hashType: SUDT_HASH_TYPE,
+          codeHash: process.env.VUE_APP_SUDT_CODE_HASH || '',
+          hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
           args: window.localStorage.getItem("lockHash") || ''
         }
       })
       // eslint-disable-next-line no-undef
-      rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
+      rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
 
-      rawTx.outputs.push({
-        capacity: `0x${(freeOutputCapacity - outputCapacity - fee).toString(16)}`,
-        lock: JSON.parse(window.localStorage.getItem("lockScript") as string),
-        type: null
-      })
-      rawTx.outputsData.push("0x")
+      const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
+      rawTx.outputs[0].capacity = '0x' + (BigInt(rawTx.outputs[0].capacity) - minerFee).toString(16)
 
-      const authToken: string | null = window.localStorage.getItem("authToken")
-
-      if (!authToken) {
-        console.error("No auth token")
-        return
+      try {
+        const response = await signAndSendTransaction(
+          rawTx,
+          authToken,
+          window.localStorage.getItem("lockHash") as string
+        )
+        message.success(`TX: ${response.txHash}`, 10)
+      } catch (error) {
+        message.error(error)
       }
-      await Rpc.signAndSendTransaction(
-        rawTx,
-        authToken,
-        window.localStorage.getItem("lockHash") as string
-      )
     }
   }
 })

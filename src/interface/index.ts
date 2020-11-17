@@ -1,28 +1,42 @@
-export interface Wallet {
-  lockScript: CKBComponents.Script;
-  address: string;
-  free: string;
-  capacity: string;
-  lockHash: string;
+/* eslint-disable camelcase */
+
+export type ScriptHashType = 'data' | 'type'
+export interface UnderscoreScript {
+  code_hash: string;
+  hash_type: 'data' | 'type';
+  args: string;
 }
 
-export interface Cell {
-  output: CKBComponents.CellOutput;
-  // eslint-disable-next-line camelcase
+export interface UnderscoreCell {
+  output: {
+    capacity: string;
+    lock: UnderscoreScript;
+    type: UnderscoreScript;
+  }
   output_data: string;
-  // eslint-disable-next-line camelcase
   out_point: {
-  // eslint-disable-next-line camelcase
     tx_hash: string;
     index: string;
   };
+  block_number: string;
+  tx_index: string;
 }
 
-export type ScriptHashType = 'data' | 'type'
-export interface RpcScript {
-  // eslint-disable-next-line camelcase
-  code_hash: string;
-  // eslint-disable-next-line camelcase
-  hash_type: 'data' | 'type';
-  args: string;
+export interface LockScriptMeta {
+  name: string;
+  cellDeps: Array<CKBComponents.CellDep>;
+  headerDeps: Array<string>;
+}
+
+export interface Account {
+  address: string;
+  lockHash: string;
+  lockScript: CKBComponents.Script;
+  lockScriptMeta: LockScriptMeta;
+  publicKey: string;
+}
+
+export interface AccountList {
+  addresses: Array<Account>;
+  userId: string;
 }

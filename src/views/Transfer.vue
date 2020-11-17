@@ -1,30 +1,46 @@
 <template>
-  <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="To Address">
-      <a-input v-model:value="form.toAddress" />
-    </a-form-item>
-    <a-form-item label="Transfer Count">
-      <a-input v-model:value="form.transferCount" type="number" />
-    </a-form-item>
-    <a-form-item label="ACP">
-      <a-checkbox v-model:checked="form.acp"  />
-    </a-form-item>
-    <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="onSubmit">
-        Submit
-      </a-button>
-    </a-form-item>
-  </a-form>
+  <a-space direction="vertical">
+    <a-row type="flex" justify="end" style="color: red">
+        <a-col :span="22"> <li>If you don't checked ACP, you will create a SUDT cell and cost you 142 CKB</li></a-col>
+        <a-col :span="22"> <li>When you check ACP, if receiver has ACP cell, we will transfer to this cell or we will create a new ACP cell and cost you 142 CKB </li></a-col>
+    </a-row>
+    <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form-item label="To Address">
+        <a-input v-model:value="form.toAddress" />
+      </a-form-item>
+      <a-form-item label="Transfer Count">
+        <a-input v-model:value="form.transferCount" type="number" />
+      </a-form-item>
+      <a-form-item label="ACP">
+        <a-checkbox v-model:checked="form.acp"  />
+      </a-form-item>
+      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+        <a-button type="primary" @click="onSubmit">
+          Submit
+        </a-button>
+      </a-form-item>
+    </a-form>
+  </a-space>
 </template>
 
 <script lang='ts'>
-import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { addressToScript } from '@nervosnetwork/ckb-sdk-utils/lib/'
 import { defineComponent } from "vue"
-import Rpc from "../utils/rpc"
-import Utils from "../utils/utils"
-import { SUDT_CODE_HASH, SUDT_HASH_TYPE, ACP_CODE_HASH, ACP_HASH_TYPE, ACP_TX_HASH } from "../utils/const"
-import { RpcScript } from '@/interface'
+import { message } from 'ant-design-vue'
+import CKBComponents from '@nervosnetwork/ckb-sdk-core'
+import { getTransactionSize, addressToScript } from '@nervosnetwork/ckb-sdk-utils'
+import {
+  getRawTxTemplate,
+  underscoreScriptKey,
+  getCells,
+  compareLockScript,
+  signAndSendTransaction,
+  camelCaseScriptKey,
+  readBigUInt128LE,
+  toUint128Le,
+  getBiggestCapacityCell,
+  FEE_RATIO
+} from "@/utils"
+import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
 export default defineComponent({
   data() {
@@ -39,26 +55,23 @@ export default defineComponent({
     }
   },
   methods: {
-    onSubmit: async function(): Promise<any> {
-      const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
-      const sudtTypeScript: CKBComponents.Script = {
-        codeHash: SUDT_CODE_HASH,
-        hashType: SUDT_HASH_TYPE,
-        args: window.localStorage.getItem("lockHash")!
-      }
-      const rawTx: CKBComponents.RawTransactionToSign = Utils.getRawTxTemplate()
-      const fromLockLiveCells = await Rpc.getCells('lock', Utils.lowerScriptKey(fromLockScript))
-      const sudtLiveCells = await Rpc.getCells('type', Utils.lowerScriptKey(sudtTypeScript))
-      if (sudtLiveCells.length === 0 || fromLockLiveCells.length === 0) {
-        return
-      }
+    onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
+      const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
+      let inputSignConfig = { index: 0, length: -1 }
 
-      const biggestFromLockCell = fromLockLiveCells.sort((cell1: any, cell2: any) => { return Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)) })[0]
-      const fromSudtLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
-      if (fromLockLiveCells.length === 0) {
+      const biggestFromLockCell = await await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
+      if (biggestFromLockCell === undefined) {
+        message.error("No Live Cells!")
         return
       }
-      const fromSudtCell = fromSudtLiveCells.sort((cell1: any, cell2: any) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
+      const sudtTypeScript: CKBComponents.Script = {
+        codeHash: process.env.VUE_APP_SUDT_CODE_HASH || '',
+        hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
+        args: window.localStorage.getItem("lockHash") || ''
+      }
+      const sudtLiveCells = await getCells('type', underscoreScriptKey(sudtTypeScript))
+      const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
+      const fromSudtCell = fromSudtLiveCells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
 
       rawTx.inputs.push({
         previousOutput: {
@@ -79,24 +92,30 @@ export default defineComponent({
       rawTx.witnesses.push("0x")
 
       const toLockScript = addressToScript(this.form.toAddress)
-      const toAcpScript: RpcScript = {
-        code_hash: ACP_CODE_HASH,
-        hash_type: ACP_HASH_TYPE,
+      const toAcpScript: UnderscoreScript = {
+        code_hash: process.env.VUE_APP_ACP_CODE_HASH || '',
+        hash_type: process.env.VUE_APP_ACP_HASH_TYPE as CKBComponents.ScriptHashType,
         args: toLockScript.args
       }
 
-      const toSudtAcpLiveCells = sudtLiveCells.filter((sudt: any) => { return Utils.compareLockScript(sudt.output.lock, toAcpScript) })
+      const toSudtAcpLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, toAcpScript) })
       if (this.form.acp === true) {
         rawTx.cellDeps.push(
           {
             outPoint: {
-              txHash: ACP_TX_HASH,
+              txHash: process.env.VUE_APP_ACP_TX_HASH || '',
               index: '0x0'
             },
             depType: 'depGroup'
           }
         )
+
         if (toSudtAcpLiveCells.length > 0) {
+          inputSignConfig = {
+            index: 0,
+            length: 2
+          }
+
           rawTx.inputs.push({
             previousOutput: {
               txHash: toSudtAcpLiveCells[0].out_point.tx_hash,
@@ -107,18 +126,18 @@ export default defineComponent({
           rawTx.witnesses.push("0x")
           rawTx.outputs.push({
             capacity: toSudtAcpLiveCells[0].output.capacity,
-            lock: Utils.camelCaseScriptKey(toAcpScript),
+            lock: camelCaseScriptKey(toAcpScript),
             type: sudtTypeScript
           })
-          const originalToSudtCount = Utils.readBigUInt128LE(toSudtAcpLiveCells[0].output_data.slice(2))
-          rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
+          const originalToSudtCount = readBigUInt128LE(toSudtAcpLiveCells[0].output_data.slice(2))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
         } else {
           rawTx.outputs.push({
             capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
-            lock: Utils.camelCaseScriptKey(toAcpScript),
+            lock: camelCaseScriptKey(toAcpScript),
             type: sudtTypeScript
           })
-          rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
         }
       } else {
         rawTx.outputs.push({
@@ -126,23 +145,27 @@ export default defineComponent({
           lock: toLockScript,
           type: sudtTypeScript
         })
-        rawTx.outputsData.push('0x' + Utils.toUint128Le(BigInt(this.form.transferCount)))
+        rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
       }
-      rawTx.outputs.push({
-        capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
-        type: sudtTypeScript
-      })
-      const originalSudtCount = BigInt('0x' + Utils.readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
-      const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** 8))
-      rawTx.outputsData.push('0x' + Utils.toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(10000) - BigInt(142 * 10 ** 8)).toString(16)}`,
-        lock: Utils.camelCaseScriptKey(fromSudtCell.output.lock),
-        type: biggestFromLockCell.output.type
+        capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
+        lock: camelCaseScriptKey(fromSudtCell.output.lock),
+        type: sudtTypeScript
+      })
+      const originalSudtCount = BigInt('0x' + readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
+      const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** 8))
+      rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
+
+      rawTx.outputs.push({
+        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(142 * 10 ** 8)).toString(16)}`,
+        lock: camelCaseScriptKey(fromSudtCell.output.lock),
+        type: biggestFromLockCell.output.type === null ? biggestFromLockCell.output.type : camelCaseScriptKey(biggestFromLockCell.output.type)
       })
       rawTx.outputsData.push(biggestFromLockCell.output_data)
+
+      const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
+      rawTx.outputs[2].capacity = '0x' + (BigInt(rawTx.outputs[2].capacity) - minerFee).toString(16)
 
       const authToken: string | null = window.localStorage.getItem("authToken")
 
@@ -151,11 +174,17 @@ export default defineComponent({
         return
       }
 
-      await Rpc.signAndSendTransaction(
-        rawTx,
-        authToken,
-        window.localStorage.getItem("lockHash") as string
-      )
+      try {
+        const response = await signAndSendTransaction(
+          rawTx,
+          authToken,
+          window.localStorage.getItem("lockHash") as string,
+          inputSignConfig
+        )
+        message.success(`TX: ${response.txHash}`, 10)
+      } catch (error) {
+        message.error(error)
+      }
     }
   }
 })

@@ -1,48 +1,40 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { KEYPERING_URL, RICH_NODE_INDEXER_URL } from './const'
-import { RpcScript } from '../interface'
+import { KEYPERING_URL } from './const'
+import { UnderscoreScript, AccountList, UnderscoreCell } from '../interface'
 
-const requestAuth = async (description: string): Promise<any> => {
-  try {
-    const response = await fetch(KEYPERING_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        id: 2,
-        jsonrpc: '2.0',
-        method: 'auth',
-        params: {
-          description
-        }
-      })
+export const requestAuth = async (description: string): Promise<string> => {
+  const response = await fetch(KEYPERING_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      id: 2,
+      jsonrpc: '2.0',
+      method: 'auth',
+      params: {
+        description
+      }
     })
-    const data = await response.json()
-    return data.result.token
-  } catch (error) {
-    console.error('error', error)
-  }
+  })
+  const data = await response.json()
+  return data.result.token
 }
 
-const queryAddresses = async (token: string): Promise<any> => {
-  try {
-    const response = await fetch(KEYPERING_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        id: 3,
-        jsonrpc: '2.0',
-        method: 'query_addresses'
-      })
+export const queryAddresses = async (token: string): Promise<AccountList> => {
+  const response = await fetch(KEYPERING_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: 3,
+      jsonrpc: '2.0',
+      method: 'query_addresses'
     })
-    const data = await response.json()
-    return data.result
-  } catch (error) {
-    console.error('error', error)
-  }
+  })
+  const data = await response.json()
+  return data.result
 }
 
-const getCells = async (scriptType: 'lock' | 'type', script: RpcScript): Promise<any> => {
+export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreScript): Promise<Array<UnderscoreCell>> => {
   const payload = {
     id: 1,
     jsonrpc: '2.0',
@@ -57,59 +49,45 @@ const getCells = async (scriptType: 'lock' | 'type', script: RpcScript): Promise
     ]
   }
   const body = JSON.stringify(payload, null, '  ')
-  try {
-    const response = await fetch(RICH_NODE_INDEXER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body
-    })
-    const data = await response.json()
-    return data.result.objects
-  } catch (error) {
-    console.error('error', error)
-  }
+  const response = await fetch(process.env.VUE_APP_RICH_NODE_INDEXER_URL || '', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body
+  })
+  const data = await response.json()
+  return data.result.objects
 }
 
-const signAndSendTransaction = async (rawTx: CKBComponents.RawTransactionToSign, token: string, lockHash: string) => {
-  const rawTransaction: CKBComponents.RawTransactionToSign = rawTx
+export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Promise<UnderscoreCell> => {
+  const cells: Array<UnderscoreCell> = await getCells('lock', lockScript)
+  return cells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
+}
+
+export const signAndSendTransaction = async (rawTransaction: CKBComponents.RawTransactionToSign, token: string, lockHash: string, inputSignConfig = { index: 0, length: -1 }): Promise<Record<string, unknown>> => {
   rawTransaction.witnesses[0] = {
     lock: '',
     inputType: '',
     outputType: ''
   }
-  try {
-    const res = await fetch(KEYPERING_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        id: 1,
-        jsonrpc: '2.0',
-        method: 'sign_and_send_transaction',
-        params: {
-          tx: rawTransaction,
-          description: "Transaction",
-          lockHash: lockHash,
-          inputSignConfig: {
-            index: 0,
-            length: 2
-          }
-        }
-      })
+  const res = await fetch(KEYPERING_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'sign_and_send_transaction',
+      params: {
+        tx: rawTransaction,
+        description: "Transaction",
+        lockHash: lockHash,
+        inputSignConfig: inputSignConfig
+      }
     })
-    const response = await res.json()
-    console.info(response)
-    return response.result
-  } catch (error) {
-    console.error('error', error)
-  }
-}
-export default {
-  requestAuth,
-  queryAddresses,
-  getCells,
-  signAndSendTransaction
+  })
+  const response = await res.json()
+  return response.result
 }
