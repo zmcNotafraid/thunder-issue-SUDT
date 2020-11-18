@@ -6,31 +6,32 @@
     >
       <div class="logo">
         <span>
-          <ThunderboltOutlined />
+          <ThunderboltFilled style='color: yellow'/>
           Thunder Issue SUDT
         </span>
       </div>
-      <a-menu mode="inline" v-model:selectedKeys="selectedKeys">
+      <hr>
+      <a-menu theme="dark" mode="inline" v-model:selectedKeys="selectedKeys">
         <a-menu-item key="1">
-          <home-outlined />
+          <HomeFilled />
           <span class="nav-text">
             <router-link to="/"> Wallet Auth </router-link>
           </span>
         </a-menu-item>
         <a-menu-item key="2">
-          <home-outlined />
+          <MoneyCollectFilled />
           <span class="nav-text">
             <router-link to="/issue">Issue Token</router-link>
           </span>
         </a-menu-item>
         <a-menu-item key="3">
-          <home-outlined />
+          <InteractionFilled />
           <span class="nav-text">
             <router-link to="/transfer">Transfer Token</router-link>
           </span>
         </a-menu-item>
         <a-menu-item key="4">
-          <home-outlined />
+          <FireFilled />
           <span class="nav-text">
             <router-link to="/burn">Burn Token</router-link>
           </span>
@@ -55,18 +56,21 @@
 <script lang="ts">
 import 'ant-design-vue/dist/antd.css'
 import { Options, Vue } from "vue-class-component"
-import { HomeOutlined, ThunderboltOutlined } from "@ant-design/icons-vue"
+import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyCollectFilled } from "@ant-design/icons-vue"
 
 @Options({
   components: {
-    HomeOutlined,
-    ThunderboltOutlined
+    HomeFilled,
+    ThunderboltFilled,
+    InteractionFilled,
+    FireFilled,
+    MoneyCollectFilled
   }
 })
 export default class App extends Vue {
   data() {
     return {
-      selectedKeys: ["1"]
+      selectedKeys: ["4"]
     }
   }
 }
@@ -81,7 +85,10 @@ export default class App extends Vue {
 }
 #components-layout-demo-responsive .logo {
   height: 32px;
-  background: rgba(255, 255, 255, 0.2);
   margin: 16px;
+  color: white;
+}
+.nav-text > a {
+  color: white
 }
 </style>

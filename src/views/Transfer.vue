@@ -1,8 +1,8 @@
 <template>
   <a-space direction="vertical">
     <a-row type="flex" justify="end" style="color: red">
-        <a-col :span="22"> <li>If you don't checked ACP, you will create a SUDT cell and cost you 142 CKB</li></a-col>
-        <a-col :span="22"> <li>When you check ACP, if receiver has ACP cell, we will transfer to this cell or we will create a new ACP cell and cost you 142 CKB </li></a-col>
+        <a-col :span="22"> <li>If you don't checked the ACP, you will create a SECP256K1/blake160 SUDT cell.</li></a-col>
+        <a-col :span="22"> <li>When you check the ACP, if receiver already has ACP cell, you will directly transfer to this cell.Otherwise, you will create a new ACP cell.</li></a-col>
     </a-row>
     <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
       <a-form-item label="To Address">

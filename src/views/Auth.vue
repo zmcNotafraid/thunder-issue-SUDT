@@ -99,7 +99,7 @@ export default defineComponent({
           return
         }
         const summary = calCapacityAmount(cells)
-        this.wallet.free = summary.free.toString()
+        this.wallet.free = formatCkb(summary.free) || "0"
         this.wallet.capacity = formatCkb(summary.capacity) || "0"
         message.success("Auth Success!")
       } catch (error) {
