@@ -54,6 +54,11 @@ export default defineComponent({
       loading: false
     }
   },
+  mounted() {
+    if (window.localStorage.getItem("authToken")) {
+      this.reload()
+    }
+  },
   methods: {
     reload: async function (): Promise<undefined> {
       this.loading = true

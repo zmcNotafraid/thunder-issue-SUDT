@@ -77,6 +77,28 @@ export const compareLockScript = (lockScript1: UnderscoreScript, lockScript2: Un
     lockScript1.hash_type === lockScript2.hash_type
 }
 
-export const toHex = (string: string): string => {
+export const stringToHex = (string: string): string => {
   return Buffer.from(string).toString('hex')
+}
+
+export const hexToString = (hex: string): string => {
+  return Buffer.from(hex, 'hex').toString('utf-8')
+}
+
+export const parseSudtInfoData = (data: string): {decimal: number, name: string, symbol: string, restInfos: Array<Array<string>>} => {
+  const [decimal, name, symbol, ...other] = data.slice(2).split("0a")
+  let restInfos: Array<Array<string>> = []
+  if (other !== [""]) {
+    restInfos = other.map(field => {
+      const key: string = field.split("3a")[0]
+      const value: string = field.split("3a")[1]
+      return [hexToString(key), hexToString(value)]
+    })
+  }
+  return {
+    decimal: parseInt(decimal),
+    name: hexToString(name),
+    symbol: hexToString(symbol),
+    restInfos: restInfos
+  }
 }

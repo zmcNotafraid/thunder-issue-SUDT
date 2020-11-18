@@ -26,7 +26,8 @@ import {
   readBigUInt128LE,
   toUint128Le,
   FEE_RATIO,
-  getBiggestCapacityCell
+  getBiggestCapacityCell,
+  sudtTypeScript
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -42,17 +43,19 @@ export default defineComponent({
   },
   methods: {
     onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
+      const authToken: string | null = window.localStorage.getItem("authToken")
+
+      if (!authToken) {
+        message.error("No auth token")
+        return
+      }
+
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
 
       const biggestFromLockCell = await await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
       if (biggestFromLockCell === undefined) {
         message.error("No Live Cells!")
         return
-      }
-      const sudtTypeScript: CKBComponents.Script = {
-        codeHash: process.env.VUE_APP_SUDT_CODE_HASH || '',
-        hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
-        args: window.localStorage.getItem("lockHash") || ''
       }
       const sudtLiveCells = await getCells('type', underscoreScriptKey(sudtTypeScript))
       const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
@@ -81,7 +84,8 @@ export default defineComponent({
         type: sudtTypeScript
       })
       const originalSudtCount = BigInt('0x' + readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
-      const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** 8))
+      const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
+      const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** decimal))
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
@@ -94,12 +98,6 @@ export default defineComponent({
       const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
       rawTx.outputs[1].capacity = '0x' + (BigInt(rawTx.outputs[1].capacity) - minerFee).toString(16)
 
-      const authToken: string | null = window.localStorage.getItem("authToken")
-
-      if (!authToken) {
-        console.error("No auth token")
-        return
-      }
       try {
         const response = await signAndSendTransaction(
           rawTx,

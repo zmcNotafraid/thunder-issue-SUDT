@@ -10,7 +10,7 @@
           Thunder Issue SUDT
         </span>
       </div>
-      <hr>
+      <a-divider />
       <a-menu theme="dark" mode="inline" v-model:selectedKeys="selectedKeys">
         <a-menu-item key="1">
           <HomeFilled />
@@ -36,7 +36,12 @@
             <router-link to="/burn">Burn Token</router-link>
           </span>
         </a-menu-item>
-
+        <a-menu-item key="5">
+          <InfoCircleFilled />
+          <span class="nav-text">
+            <router-link to="/info">Token Info</router-link>
+          </span>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>
@@ -56,7 +61,7 @@
 <script lang="ts">
 import 'ant-design-vue/dist/antd.css'
 import { Options, Vue } from "vue-class-component"
-import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyCollectFilled } from "@ant-design/icons-vue"
+import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyCollectFilled, InfoCircleFilled } from "@ant-design/icons-vue"
 
 @Options({
   components: {
@@ -64,13 +69,14 @@ import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyColl
     ThunderboltFilled,
     InteractionFilled,
     FireFilled,
-    MoneyCollectFilled
+    MoneyCollectFilled,
+    InfoCircleFilled
   }
 })
 export default class App extends Vue {
   data() {
     return {
-      selectedKeys: ["4"]
+      selectedKeys: ["1"]
     }
   }
 }

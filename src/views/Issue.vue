@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="Token Count">
+    <a-form-item label="Token Total Supply Count">
       <a-input v-model:value="form.count" type="number" min="1" step="1" />
     </a-form-item>
     <a-form-item label="Token Name">
@@ -33,7 +33,8 @@ import {
   getBiggestCapacityCell,
   FEE_RATIO,
   camelCaseScriptKey,
-  toHex
+  stringToHex,
+  sudtTypeScript
 } from "@/utils"
 import { UnderscoreCell } from '../interface/index'
 
@@ -44,7 +45,7 @@ export default defineComponent({
         count: "0",
         name: "",
         symbol: "",
-        decimal: "8"
+        decimal: 8
       },
       labelCol: { span: 4 },
       wrapperCol: { span: 10 }
@@ -58,6 +59,7 @@ export default defineComponent({
         message.error("No auth token")
         return
       }
+      window.localStorage.setItem("decimal", this.form.decimal.toString())
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const cell: UnderscoreCell = await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
       const sudtCapacity = BigInt(142 * 10 ** 8)
@@ -81,18 +83,12 @@ export default defineComponent({
       })
       rawTx.witnesses.push("0x")
 
-      const sudtTypeScript = {
-        codeHash: process.env.VUE_APP_SUDT_CODE_HASH || '',
-        hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
-        args: window.localStorage.getItem("lockHash") || ''
-      }
-
       rawTx.outputs.push({
         capacity: `0x${sudtCapacity.toString(16)}`,
         lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
         type: sudtTypeScript
       })
-      rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.count) * BigInt(10 ** 8)))
+      rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.count) * BigInt(10 ** this.form.decimal)))
 
       rawTx.outputs.push({
         capacity: `0x${sudtInfoCapacity.toString(16)}`,
@@ -103,7 +99,7 @@ export default defineComponent({
           args: scriptToHash(sudtTypeScript)
         }
       })
-      rawTx.outputsData.push(`0x${parseInt(this.form.decimal).toString(16).padStart(2, '0')}0a${toHex(this.form.name)}0a${toHex(this.form.symbol)}`)
+      rawTx.outputsData.push(`0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(this.form.name)}0a${stringToHex(this.form.symbol)}0a${stringToHex("TotalSupply:" + this.form.count)}`)
 
       rawTx.outputs.push({
         capacity: `0x${(restCapacity).toString(16)}`,
