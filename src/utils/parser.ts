@@ -40,7 +40,7 @@ export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {
       {
         outPoint: {
           txHash: process.env.VUE_APP_SUDT_TX_HASH || '',
-          index: '0x0'
+          index: process.env.VUE_APP_SUDT_INDEX || '0x0'
         },
         depType: 'code'
       }
@@ -75,4 +75,8 @@ export const compareLockScript = (lockScript1: UnderscoreScript, lockScript2: Un
   return lockScript1.args === lockScript2.args &&
     lockScript1.code_hash === lockScript2.code_hash &&
     lockScript1.hash_type === lockScript2.hash_type
+}
+
+export const toHex = (string: string): string => {
+  return Buffer.from(string).toString('hex')
 }

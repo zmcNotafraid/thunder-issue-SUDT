@@ -104,7 +104,7 @@ export default defineComponent({
           {
             outPoint: {
               txHash: process.env.VUE_APP_ACP_TX_HASH || '',
-              index: '0x0'
+              index: process.env.VUE_APP_ACP_INDEX || '0x0'
             },
             depType: 'depGroup'
           }
