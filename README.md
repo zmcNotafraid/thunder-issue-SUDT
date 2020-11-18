@@ -1,6 +1,6 @@
 ## An Open Source Issue CKB SUDT GUI
 
-Make issue [SUDT](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0025-simple-udt/0025-simple-udt.md) like thunder ⚡️
+Speed up issue [SUDT](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0025-simple-udt/0025-simple-udt.md) like thunder ⚡️
 
 ### Requirements
 - Vue 3.0
@@ -10,24 +10,25 @@ Make issue [SUDT](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0025-si
 
 ### Getting started
 
-1. Install dependencies
+1. Run Keypering
+
+2. Install dependencies
 
     ```$ yarn install```
 
-2. Modify .env file SUDT and ACP Script. (Default is CKB testnet script
+3. Copy ```.env.example``` file to ```.env.local```, modify SUDT and ACP Script. (Default is CKB testnet script)
 
-3. Run App
+4. Run App
 
     ```$ yarn serve```
+
+5. Visit ```http://localshot:8080```
 
 ### RoadMap
  - [x] Keypering Auth
  - [x] Issue SUDT
  - [x] Transfer SUDT
  - [x] Burn SUDT
- - [] Submit Token Info
- - [] [pw-core](https://github.com/lay2dev/pw-core) Auth
-
-### Reference
-
-- https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0024-ckb-system-script-list/0024-ckb-system-script-list.md
+ - [x] Submit Token Info
+ - [ ] Test Coverage
+ - [ ] [pw-core](https://github.com/lay2dev/pw-core) Auth
