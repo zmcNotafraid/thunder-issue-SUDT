@@ -13,34 +13,44 @@
       <a-divider />
       <a-menu theme="dark" mode="inline" v-model:selectedKeys="selectedKeys">
         <a-menu-item key="1">
-          <HomeFilled />
-          <span class="nav-text">
-            <router-link to="/"> Wallet Auth </router-link>
-          </span>
+          <router-link to="/">
+            <HomeFilled />
+            <span class="nav-text">
+              Wallet Auth
+            </span>
+          </router-link>
         </a-menu-item>
         <a-menu-item key="2">
-          <MoneyCollectFilled />
-          <span class="nav-text">
-            <router-link to="/issue">Issue Token</router-link>
-          </span>
+          <router-link to="/issue">
+            <MoneyCollectFilled />
+            <span class="nav-text">
+              Issue Token
+            </span>
+          </router-link>
         </a-menu-item>
         <a-menu-item key="3">
-          <InteractionFilled />
-          <span class="nav-text">
-            <router-link to="/transfer">Transfer Token</router-link>
-          </span>
+          <router-link to="/transfer">
+            <InteractionFilled />
+            <span class="nav-text">
+              Transfer Token
+            </span>
+          </router-link>
         </a-menu-item>
         <a-menu-item key="4">
-          <FireFilled />
-          <span class="nav-text">
-            <router-link to="/burn">Burn Token</router-link>
-          </span>
+          <router-link to="/burn">
+            <FireFilled />
+            <span class="nav-text">
+              Burn Token
+            </span>
+          </router-link>
         </a-menu-item>
         <a-menu-item key="5">
-          <InfoCircleFilled />
-          <span class="nav-text">
-            <router-link to="/info">Token Info</router-link>
-          </span>
+          <router-link to="/info">
+            <InfoCircleFilled />
+            <span class="nav-text">
+              Token Info
+            </span>
+          </router-link>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
