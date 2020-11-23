@@ -63,7 +63,7 @@ export default defineComponent({
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const cell: UnderscoreCell = await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
       const sudtCapacity = BigInt(142 * 10 ** 8)
-      const sudtInfoCapacity = BigInt(350 * 10 ** 8)
+      const sudtInfoCapacity = BigInt(170 * 10 ** 8)
       const restCapacity = BigInt(cell.output.capacity) - sudtCapacity - sudtInfoCapacity
 
       rawTx.cellDeps.push({
@@ -119,7 +119,7 @@ export default defineComponent({
         )
         message.success(`TX: ${response.txHash}`, 10)
       } catch (error) {
-        message.error(error)
+        message.error(error.message)
       }
     }
   }

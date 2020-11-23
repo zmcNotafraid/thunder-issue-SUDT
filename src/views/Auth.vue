@@ -108,7 +108,7 @@ export default defineComponent({
         this.wallet.capacity = formatCkb(summary.capacity) || "0"
         message.success("Auth Success!")
       } catch (error) {
-        message.error(error)
+        message.error(error.message)
       }
       this.loading = false
     },
@@ -118,7 +118,7 @@ export default defineComponent({
         window.localStorage.setItem("authToken", token)
         await this.reload()
       } catch (error) {
-        message.error(error)
+        message.error(error.message)
       }
     }
   }

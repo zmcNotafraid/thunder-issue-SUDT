@@ -1,6 +1,7 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { KEYPERING_URL } from '../utils'
 import { UnderscoreScript, AccountList, UnderscoreCell } from '../interface'
+import { message } from 'ant-design-vue'
 
 export const requestAuth = async (description: string): Promise<string> => {
   const response = await fetch(KEYPERING_URL, {
@@ -89,6 +90,8 @@ export const signAndSendTransaction = async (rawTransaction: CKBComponents.RawTr
     })
   })
   const response = await res.json()
-  console.info(response)
+  if (response.message) {
+    message.error(response.message, 10)
+  }
   return response.result
 }

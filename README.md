@@ -31,4 +31,3 @@ Speed up issue [SUDT](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/002
  - [x] Burn SUDT
  - [x] Submit Token Info
  - [ ] Test Coverage
- - [ ] [pw-core](https://github.com/lay2dev/pw-core) Auth

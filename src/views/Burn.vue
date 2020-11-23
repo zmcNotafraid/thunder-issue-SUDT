@@ -104,10 +104,9 @@ export default defineComponent({
           authToken,
           window.localStorage.getItem("lockHash") as string
         )
-        console.info(response)
         message.success(`TX: ${response.txHash}`, 10)
       } catch (error) {
-        message.error(error)
+        message.error(error.message)
       }
     }
   }
