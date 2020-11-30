@@ -9,8 +9,8 @@
     <a-descriptions-item label="Decimal">
       {{ decimal }}
     </a-descriptions-item>
-    <a-descriptions-item v-for="info in restInfos" :label="info[0]" :key="info[0]">
-      {{ info[1] }}
+    <a-descriptions-item v-for="info in restInfos" :label="Object.keys(info)[0]" :key="Object.values(info)[0]">
+      {{ Object.values(info)[0] }}
     </a-descriptions-item>
   </a-descriptions>
   <a-row type="flex" justify="center" style='margin-top: 10px'>
@@ -41,7 +41,7 @@ export default defineComponent({
       symbol: "",
       decimal: 0,
       totalSupply: 0,
-      restInfos: [] as Array<Array<string>>
+      restInfos: [] as Array<Record<string, unknown>>
     }
   },
   async mounted() {

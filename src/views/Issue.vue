@@ -34,7 +34,10 @@ import {
   FEE_RATIO,
   camelCaseScriptKey,
   stringToHex,
-  sudtTypeScript
+  sudtTypeScript,
+  getCells,
+  underscoreScriptKey,
+  parseSudtInfoData
 } from "@/utils"
 import { UnderscoreCell } from '../interface/index'
 
@@ -64,7 +67,8 @@ export default defineComponent({
       const cell: UnderscoreCell = await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
       const sudtCapacity = BigInt(142 * 10 ** 8)
       const sudtInfoCapacity = BigInt(170 * 10 ** 8)
-      const restCapacity = BigInt(cell.output.capacity) - sudtCapacity - sudtInfoCapacity
+      let restCapacity = BigInt(cell.output.capacity) - sudtCapacity - sudtInfoCapacity
+      let totalSupply = BigInt(this.form.count)
 
       rawTx.cellDeps.push({
         outPoint: {
@@ -83,6 +87,27 @@ export default defineComponent({
       })
       rawTx.witnesses.push("0x")
 
+      const sudtInfoTypeScript = {
+        codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
+        hashType: process.env.VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
+        args: scriptToHash(sudtTypeScript)
+      }
+      const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
+      if (sudtInfoCells.length > 0) {
+        rawTx.inputs.push({
+          previousOutput: {
+            txHash: sudtInfoCells[0].out_point.tx_hash,
+            index: sudtInfoCells[0].out_point.index
+          },
+          since: "0x0"
+        })
+        rawTx.witnesses.push("0x")
+        restCapacity = restCapacity - BigInt(sudtInfoCells[0].output.capacity)
+        const oldTotalSupply = parseSudtInfoData(sudtInfoCells[0].output_data).restInfos.filter(obj => obj.TotalSupply !== undefined)
+
+        totalSupply = totalSupply + BigInt(oldTotalSupply[0].TotalSupply)
+      }
+
       rawTx.outputs.push({
         capacity: `0x${sudtCapacity.toString(16)}`,
         lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
@@ -93,13 +118,10 @@ export default defineComponent({
       rawTx.outputs.push({
         capacity: `0x${sudtInfoCapacity.toString(16)}`,
         lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
-        type: {
-          codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
-          hashType: process.env.VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-          args: scriptToHash(sudtTypeScript)
-        }
+        type: sudtInfoTypeScript
       })
-      rawTx.outputsData.push(`0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(this.form.name)}0a${stringToHex(this.form.symbol)}0a${stringToHex("TotalSupply:" + this.form.count)}`)
+      debugger
+      rawTx.outputsData.push(`0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(this.form.name)}0a${stringToHex(this.form.symbol)}0a${stringToHex("TotalSupply:" + totalSupply.toString())}`)
 
       rawTx.outputs.push({
         capacity: `0x${(restCapacity).toString(16)}`,
