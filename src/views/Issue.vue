@@ -37,7 +37,8 @@ import {
   sudtTypeScript,
   getCells,
   underscoreScriptKey,
-  parseSudtInfoData
+  parseSudtInfoData,
+  SUDT_SMALLEST_CAPACITY
 } from "@/utils"
 import { UnderscoreCell } from '../interface/index'
 
@@ -65,9 +66,8 @@ export default defineComponent({
       window.localStorage.setItem("decimal", this.form.decimal.toString())
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const cell: UnderscoreCell = await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
-      const sudtCapacity = BigInt(142 * 10 ** 8)
       const sudtInfoCapacity = BigInt(170 * 10 ** 8)
-      let restCapacity = BigInt(cell.output.capacity) - sudtCapacity - sudtInfoCapacity
+      let restCapacity = BigInt(cell.output.capacity) - SUDT_SMALLEST_CAPACITY - sudtInfoCapacity
       let totalSupply = BigInt(this.form.count)
 
       rawTx.cellDeps.push({
@@ -109,7 +109,7 @@ export default defineComponent({
       }
 
       rawTx.outputs.push({
-        capacity: `0x${sudtCapacity.toString(16)}`,
+        capacity: `0x${SUDT_SMALLEST_CAPACITY.toString(16)}`,
         lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
         type: sudtTypeScript
       })
@@ -120,7 +120,7 @@ export default defineComponent({
         lock: camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)),
         type: sudtInfoTypeScript
       })
-      debugger
+
       rawTx.outputsData.push(`0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(this.form.name)}0a${stringToHex(this.form.symbol)}0a${stringToHex("TotalSupply:" + totalSupply.toString())}`)
 
       rawTx.outputs.push({

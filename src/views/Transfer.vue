@@ -39,7 +39,8 @@ import {
   toUint128Le,
   getBiggestCapacityCell,
   FEE_RATIO,
-  sudtTypeScript
+  sudtTypeScript,
+  SUDT_SMALLEST_CAPACITY
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -135,7 +136,7 @@ export default defineComponent({
           rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
         } else {
           rawTx.outputs.push({
-            capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
+            capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
             lock: camelCaseScriptKey(toAcpScript),
             type: sudtTypeScript
           })
@@ -143,7 +144,7 @@ export default defineComponent({
         }
       } else {
         rawTx.outputs.push({
-          capacity: '0x' + (BigInt(142 * 10 ** 8)).toString(16),
+          capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
           lock: toLockScript,
           type: sudtTypeScript
         })
@@ -161,7 +162,7 @@ export default defineComponent({
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - BigInt(142 * 10 ** 8)).toString(16)}`,
+        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - SUDT_SMALLEST_CAPACITY).toString(16)}`,
         lock: camelCaseScriptKey(fromSudtCell.output.lock),
         type: biggestFromLockCell.output.type === null ? biggestFromLockCell.output.type : camelCaseScriptKey(biggestFromLockCell.output.type)
       })
