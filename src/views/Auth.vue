@@ -1,6 +1,7 @@
 <template>
+  <a-space direction="vertical">
   <a-row>
-    <a-col :span="6" :offset="8">
+    <a-col :span="6">
       <div class="Auth">
         <a-button type="primary" @click="getAuth">
           Request Auth
@@ -9,18 +10,28 @@
     </a-col>
   </a-row>
   <a-spin tip="Loading..." :spinning="loading">
-  <a-descriptions title="Wallet Info" bordered>
-    <a-descriptions-item label="Address" :span="3">
-      {{ address }}
-    </a-descriptions-item>
-    <a-descriptions-item label="Capacity (CKB)">
-      {{ capacity }}
-    </a-descriptions-item>
-    <a-descriptions-item label="Free Capacity (CKB)">
-      {{ free }}
-    </a-descriptions-item>
-  </a-descriptions>
+    <a-descriptions title="Wallet Info" bordered>
+      <a-descriptions-item label="Address" :span="3">
+        {{ address }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Capacity (CKB)">
+        {{ capacity }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Free Capacity (CKB)">
+        {{ free }}
+      </a-descriptions-item>
+    </a-descriptions>
+    <br>
+    <a-descriptions title="Your SUDT" bordered>
+      <a-descriptions-item label="Args">
+        {{ tokenArgs }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Amount">
+        {{ tokenAmount }}
+      </a-descriptions-item>
+    </a-descriptions>
   </a-spin>
+  </a-space>
 </template>
 
 <script lang="ts">
@@ -32,17 +43,23 @@ import {
   requestAuth,
   SECP256K1_BLAKE160_CODE_HASH,
   calCapacityAmount,
-  formatCkb
+  parseBigIntFloat,
+  sudtTypeScript,
+  compareScript,
+  underscoreScriptKey,
+  calSudtAmount
 } from "@/utils"
-import { UnderscoreScript, Account, AccountList } from "../interface/index"
+import { UnderscoreScript, UnderscoreCell, Account, AccountList } from "../interface/index"
 
 export default defineComponent({
   data() {
     return {
       address: "",
-      free: "0",
-      capacity: "0",
-      loading: false
+      free: 0,
+      capacity: 0,
+      loading: false,
+      tokenArgs: "",
+      tokenAmount: 0
     }
   },
   mounted() {
@@ -94,9 +111,15 @@ export default defineComponent({
           message.error("No avaiable cells")
           return
         }
+
+        const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
+        if (sudtCells.length > 0) {
+          this.tokenArgs = sudtCells[0].output.type.args
+          this.tokenAmount = parseBigIntFloat(calSudtAmount(sudtCells))
+        }
         const summary = calCapacityAmount(cells)
-        this.free = formatCkb(summary.free) || "0"
-        this.capacity = formatCkb(summary.capacity) || "0"
+        this.free = parseBigIntFloat(summary.free) || 0
+        this.capacity = parseBigIntFloat(summary.capacity) || 0
         message.success("Auth Success!")
       } catch (error) {
         message.error(error.message)

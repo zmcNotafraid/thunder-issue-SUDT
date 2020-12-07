@@ -1,17 +1,17 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
 
-export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: number, capacity: number} {
+export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
   const capacity = cells
-    .map(cell => parseInt(cell.output.capacity))
-    .reduce((acc, curr) => acc + curr, 0)
+    .map(cell => BigInt(cell.output.capacity))
+    .reduce((acc, curr) => acc + curr, BigInt(0))
 
   const freeCells = cells.filter(cell => cell.output_data === '0x')
-  let free = 0
+  let free = 0n
   if (freeCells !== undefined) {
     free = freeCells
-      .map(cell => parseInt(cell.output.capacity))
-      .reduce((acc, curr) => acc + curr, 0)
+      .map(cell => BigInt(cell.output.capacity))
+      .reduce((acc, curr) => acc + curr, BigInt(0))
   }
 
   return {
@@ -20,17 +20,11 @@ export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free:
   }
 }
 
-export const formatCkb = function (value: number): string | undefined {
-  if (typeof value === 'undefined') {
-    return undefined
-  }
-  const fraction: number = value % 100000000
-  const fractionStr: string = fraction.toString().padStart(8, '0')
-  const integer: number = Math.floor(value / 100000000)
-  const integerStr: string = new Intl.NumberFormat(undefined, {
-    useGrouping: true
-  }).format(integer)
-  return integerStr + '.' + fractionStr
+export const parseBigIntFloat = function (number: bigint, decimal = 8): number {
+  const stringBigInt = number.toString()
+  const length = stringBigInt.length
+  const stringNumber = `${stringBigInt.slice(0, length - decimal)}.${stringBigInt.slice(decimal)}`
+  return +stringNumber
 }
 
 export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {
@@ -71,10 +65,13 @@ export const camelCaseScriptKey = (ckbScript: UnderscoreScript): CKBComponents.S
   return { codeHash: ckbScript.code_hash, hashType: ckbScript.hash_type, args: ckbScript.args }
 }
 
-export const compareLockScript = (lockScript1: UnderscoreScript, lockScript2: UnderscoreScript): boolean => {
-  return lockScript1.args === lockScript2.args &&
-    lockScript1.code_hash === lockScript2.code_hash &&
-    lockScript1.hash_type === lockScript2.hash_type
+export const compareScript = (script1: UnderscoreScript, script2: UnderscoreScript): boolean => {
+  if (script1 === null || script2 === null) {
+    return false
+  }
+  return script1.args === script2.args &&
+    script1.code_hash === script2.code_hash &&
+    script1.hash_type === script2.hash_type
 }
 
 export const stringToHex = (string: string): string => {
@@ -103,4 +100,11 @@ export const parseSudtInfoData = (data: string): {decimal: number, name: string,
     symbol: hexToString(symbol),
     restInfos: restInfos
   }
+}
+
+export const calSudtAmount = function(cells: Array<UnderscoreCell>): bigint {
+  const amount = cells
+    .map(cell => BigInt('0x' + readBigUInt128LE(cell.output_data.slice(2, 34))))
+    .reduce((acc, curr) => acc + curr, BigInt(0))
+  return amount
 }

@@ -32,7 +32,7 @@ import {
   getRawTxTemplate,
   underscoreScriptKey,
   getCells,
-  compareLockScript,
+  compareScript,
   signAndSendTransaction,
   camelCaseScriptKey,
   readBigUInt128LE,
@@ -73,7 +73,7 @@ export default defineComponent({
         return
       }
       const sudtLiveCells = await getCells('type', underscoreScriptKey(sudtTypeScript))
-      const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, biggestFromLockCell.output.lock) })
+      const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareScript(sudt.output.lock, biggestFromLockCell.output.lock) })
       const fromSudtCell = fromSudtLiveCells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
 
       rawTx.inputs.push({
@@ -101,7 +101,7 @@ export default defineComponent({
         args: toLockScript.args
       }
 
-      const toSudtAcpLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareLockScript(sudt.output.lock, toAcpScript) })
+      const toSudtAcpLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareScript(sudt.output.lock, toAcpScript) })
       if (this.form.acp === true) {
         rawTx.cellDeps.push(
           {
