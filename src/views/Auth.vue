@@ -5,27 +5,22 @@
         <a-button type="primary" @click="getAuth">
           Request Auth
         </a-button>
-        <a-button @click="reload" style="margin-left: 10px;">
-          Reload{{ (loading && "ing..") || "" }}
-        </a-button>
       </div>
     </a-col>
   </a-row>
-  <a-form
-    :model="wallet"
-    :label-col="labelCol"
-    :wrapper-col="wrapperCol"
-  >
-    <a-form-item label="Wallet Addresss">
-      <a-input disabled v-model:value="wallet.address" />
-    </a-form-item>
-    <a-form-item label="Balance without data(CKB)">
-      <a-input disabled v-model:value="wallet.free" />
-    </a-form-item>
-    <a-form-item label="Balance (CKB)">
-      <a-input disabled v-model:value="wallet.capacity" />
-    </a-form-item>
-  </a-form>
+  <a-spin tip="Loading..." :spinning="loading">
+  <a-descriptions title="Wallet Info" bordered>
+    <a-descriptions-item label="Address" :span="3">
+      {{ address }}
+    </a-descriptions-item>
+    <a-descriptions-item label="Capacity (CKB)">
+      {{ capacity }}
+    </a-descriptions-item>
+    <a-descriptions-item label="Free Capacity (CKB)">
+      {{ free }}
+    </a-descriptions-item>
+  </a-descriptions>
+  </a-spin>
 </template>
 
 <script lang="ts">
@@ -44,13 +39,9 @@ import { UnderscoreScript, Account, AccountList } from "../interface/index"
 export default defineComponent({
   data() {
     return {
-      wallet: {
-        address: "",
-        free: "0",
-        capacity: "0"
-      },
-      labelCol: { span: 6 },
-      wrapperCol: { span: 12 },
+      address: "",
+      free: "0",
+      capacity: "0",
       loading: false
     }
   },
@@ -84,7 +75,7 @@ export default defineComponent({
         }
 
         const defaultAddress = address[0]
-        this.wallet.address = defaultAddress.address
+        this.address = defaultAddress.address
         window.localStorage.setItem("lockHash", defaultAddress.lockHash)
 
         const lockScript: UnderscoreScript = {
@@ -104,8 +95,8 @@ export default defineComponent({
           return
         }
         const summary = calCapacityAmount(cells)
-        this.wallet.free = formatCkb(summary.free) || "0"
-        this.wallet.capacity = formatCkb(summary.capacity) || "0"
+        this.free = formatCkb(summary.free) || "0"
+        this.capacity = formatCkb(summary.capacity) || "0"
         message.success("Auth Success!")
       } catch (error) {
         message.error(error.message)
@@ -124,3 +115,11 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+.spin-content {
+  border: 1px solid #91d5ff;
+  background-color: #e6f7ff;
+  padding: 30px;
+}
+</style>
