@@ -61,11 +61,6 @@ export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreSc
   return data.result.objects
 }
 
-export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Promise<UnderscoreCell> => {
-  const cells: Array<UnderscoreCell> = await getCells('lock', lockScript)
-  return cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
-}
-
 export const signAndSendTransaction = async (rawTransaction: CKBComponents.RawTransactionToSign, token: string, lockHash: string, inputSignConfig = { index: 0, length: -1 }): Promise<Record<string, unknown>> => {
   rawTransaction.witnesses[0] = {
     lock: '',

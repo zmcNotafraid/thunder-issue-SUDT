@@ -90,7 +90,7 @@ export default defineComponent({
       const sudtInfoTypeScript = {
         codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
         hashType: process.env.VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-        args: scriptToHash(sudtTypeScript)
+        args: scriptToHash(camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)))
       }
       const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
       if (sudtInfoCells.length > 0) {

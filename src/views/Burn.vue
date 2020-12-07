@@ -2,6 +2,7 @@
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="Burn Count">
       <a-input v-model:value="form.burnCount" type="number" />
+      <span>Avaiable CKB: {{ currentSudtCount }}</span>
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -18,17 +19,16 @@ import { getTransactionSize } from '@nervosnetwork/ckb-sdk-utils'
 import { message } from 'ant-design-vue'
 import {
   getRawTxTemplate,
-  underscoreScriptKey,
-  getCells,
-  compareScript,
   signAndSendTransaction,
   camelCaseScriptKey,
-  readBigUInt128LE,
   toUint128Le,
+  combineInputCells,
   FEE_RATIO,
-  getBiggestCapacityCell,
   sudtTypeScript,
-  SUDT_SMALLEST_CAPACITY
+  SUDT_SMALLEST_CAPACITY,
+  calSudtAmount,
+  calCapacityAmount,
+  parseBigIntFloat
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -38,63 +38,70 @@ export default defineComponent({
       form: {
         burnCount: "0"
       },
+      inputCells: [] as Array<UnderscoreCell>,
+      fromSudtCells: [] as Array<UnderscoreCell>,
+      biggestCapacityCell: {} as UnderscoreCell,
+      originalSudtCount: 0n,
+      currentSudtCount: "0",
       labelCol: { span: 4 },
       wrapperCol: { span: 10 }
+    }
+  },
+  async mounted() {
+    const inputCells = await combineInputCells()
+    this.inputCells = [...inputCells]
+    if (inputCells.length === 0) {
+      message.error("No Available Cells!")
+    } else {
+      this.biggestCapacityCell = inputCells.shift()!
+      this.fromSudtCells = inputCells || []
+      this.originalSudtCount = calSudtAmount(inputCells)
+      this.currentSudtCount = parseBigIntFloat(this.originalSudtCount).toString()
     }
   },
   methods: {
     onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem("authToken")
-
       if (!authToken) {
         message.error("No auth token")
         return
       }
 
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
-
-      const biggestFromLockCell = await await getBiggestCapacityCell(JSON.parse(window.localStorage.getItem("lockScript") as string))
-      if (biggestFromLockCell === undefined) {
-        message.error("No Live Cells!")
+      const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
+      if (this.inputCells.length === 0) {
+        message.error("No Available Cells!")
         return
       }
-      const sudtLiveCells = await getCells('type', underscoreScriptKey(sudtTypeScript))
-      const fromSudtLiveCells = sudtLiveCells.filter((sudt: UnderscoreCell) => { return compareScript(sudt.output.lock, biggestFromLockCell.output.lock) })
-      const fromSudtCell = fromSudtLiveCells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
 
-      rawTx.inputs.push({
-        previousOutput: {
-          txHash: fromSudtCell.out_point.tx_hash,
-          index: fromSudtCell.out_point.index
-        },
-        since: "0x0"
+      this.inputCells.forEach(cell => {
+        rawTx.inputs.push({
+          previousOutput: {
+            txHash: cell.out_point.tx_hash,
+            index: cell.out_point.index
+          },
+          since: "0x0"
+        })
+        rawTx.witnesses.push("0x")
       })
-      rawTx.witnesses.push("0x")
-      rawTx.inputs.push({
-        previousOutput: {
-          txHash: biggestFromLockCell.out_point.tx_hash,
-          index: biggestFromLockCell.out_point.index
-        },
-        since: "0x0"
-      })
-      rawTx.witnesses.push("0x")
 
-      rawTx.outputs.push({
-        capacity: `0x${(BigInt(fromSudtCell.output.capacity)).toString(16)}`,
-        lock: camelCaseScriptKey(fromSudtCell.output.lock),
-        type: sudtTypeScript
-      })
-      const originalSudtCount = BigInt('0x' + readBigUInt128LE(fromSudtCell.output_data.slice(2, 34)))
+      const originalSudtCount = calSudtAmount(this.fromSudtCells)
+      const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
       const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
       const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** decimal))
+      rawTx.outputs.push({
+        capacity: `0x${originalCapacity.toString(16)}`,
+        lock: camelCaseScriptKey(fromLockScript),
+        type: sudtTypeScript
+      })
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(biggestFromLockCell.output.capacity) - SUDT_SMALLEST_CAPACITY).toString(16)}`,
-        lock: camelCaseScriptKey(fromSudtCell.output.lock),
-        type: biggestFromLockCell.output.type === null ? biggestFromLockCell.output.type : camelCaseScriptKey(biggestFromLockCell.output.type)
+        capacity: `0x${(BigInt(this.biggestCapacityCell.output.capacity) - SUDT_SMALLEST_CAPACITY).toString(16)}`,
+        lock: camelCaseScriptKey(fromLockScript),
+        type: null
       })
-      rawTx.outputsData.push(biggestFromLockCell.output_data)
+      rawTx.outputsData.push(this.biggestCapacityCell.output_data)
 
       const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
       rawTx.outputs[1].capacity = '0x' + (BigInt(rawTx.outputs[1].capacity) - minerFee).toString(16)
@@ -106,6 +113,7 @@ export default defineComponent({
           window.localStorage.getItem("lockHash") as string
         )
         message.success(`TX: ${response.txHash}`, 10)
+        setTimeout(this.$router.go, 5000)
       } catch (error) {
         message.error(error.message)
       }
