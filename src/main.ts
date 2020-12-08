@@ -15,7 +15,8 @@ import {
   Space,
   Descriptions,
   Divider,
-  Spin
+  Spin,
+  Modal
 } from 'ant-design-vue'
 
 const app = createApp(App)
@@ -33,6 +34,7 @@ app.use(Space)
 app.use(Descriptions)
 app.use(Divider)
 app.use(Spin)
+app.use(Modal)
 
 app.use(router)
 
