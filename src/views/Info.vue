@@ -30,7 +30,8 @@ import {
   parseSudtInfoData,
   underscoreScriptKey,
   readBigUInt128LE,
-  sudtTypeScript
+  sudtTypeScript,
+  camelCaseScriptKey
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from "../interface/index"
 
@@ -54,7 +55,7 @@ export default defineComponent({
     const sudtInfoTypeScript: UnderscoreScript = {
       code_hash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
       hash_type: process.env.VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-      args: scriptToHash(sudtTypeScript)
+      args: scriptToHash(camelCaseScriptKey(JSON.parse(window.localStorage.getItem("lockScript") as string)))
     }
     const cells = await getCells('type', sudtInfoTypeScript)
     const newewstCell = cells.sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => { return (Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))) })[0]
