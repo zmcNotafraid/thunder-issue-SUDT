@@ -1,17 +1,22 @@
 <template>
   <div>
-    <a-button type="primary" @click="showModal">
-      Generate SUDT Info
-    </a-button>
+    <a-space>
+      <a-button type="primary" @click="showModal">
+        Generate SUDT Info
+      </a-button>
+      <a-button @click="submitInfo">
+        Submit Token Info
+      </a-button>
+    </a-space>
     <a-modal
-      title="Title"
+      title="Generate SUDT Info"
       :visible="visible"
       :confirm-loading="confirmLoading"
       @ok="handleOk"
       @cancel="handleCancel"
     >
       <template v-slot:footer>
-        <a-button key="back" @click="handleCancel"> Return </a-button>
+        <a-button key="back" @click="handleCancel"> Cancel </a-button>
         <a-button
           key="submit"
           type="primary"
@@ -43,6 +48,7 @@
       </a-form>
     </a-modal>
   </div>
+  <br>
   <a-descriptions title="Token Info" bordered>
     <a-descriptions-item label="Name">
       {{ name }}
@@ -61,13 +67,6 @@
       {{ Object.values(info)[0] }}
     </a-descriptions-item>
   </a-descriptions>
-  <a-row type="flex" justify="center" style="margin-top: 10px">
-    <a-col>
-      <a-button type="primary" @click="submitInfo">
-        Submit Token Info
-      </a-button>
-    </a-col>
-  </a-row>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
