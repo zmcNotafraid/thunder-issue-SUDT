@@ -78,6 +78,7 @@ export default defineComponent({
         const results: AccountList = await queryAddresses(authToken)
         if (results === undefined) {
           message.error("Can't find your address.Please auth again.")
+          this.loading = false
           return
         }
 
