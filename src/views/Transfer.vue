@@ -10,7 +10,7 @@
       </a-form-item>
       <a-form-item label="Transfer Count">
         <a-input v-model:value="form.transferCount" type="number"/>
-        <span>Avaiable CKB: {{ currentSudtCount }}</span>
+        <span>Avaiable SUDT: {{ currentSudtCount }}</span>
       </a-form-item>
       <a-form-item label="ACP">
         <a-checkbox v-model:checked="form.acp"  />
@@ -42,7 +42,7 @@ import {
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
-  parseBigIntFloat,
+  parseBigIntStringNumber,
   getCells,
   underscoreScriptKey
 } from "@/utils"
@@ -75,7 +75,7 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
-      this.currentSudtCount = parseBigIntFloat(this.originalSudtCount).toString()
+      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount)
     }
   },
   methods: {

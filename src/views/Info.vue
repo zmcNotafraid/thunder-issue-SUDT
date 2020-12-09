@@ -11,22 +11,20 @@
     <a-modal
       title="Generate SUDT Info"
       :visible="visible"
-      :confirm-loading="confirmLoading"
-      @ok="handleOk"
       @cancel="handleCancel"
+      :confirm-loading="confirmLoading"
     >
       <template v-slot:footer>
         <a-button key="back" @click="handleCancel"> Cancel </a-button>
         <a-button
           key="submit"
           type="primary"
-          :loading="loading"
           @click="handleSubmit"
         >
           Submit
         </a-button>
       </template>
-      <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form :model="form" >
         <a-form-item label="Token Total Supply Count">
           <a-input v-model:value="form.count" type="number" min="1" step="1" />
         </a-form-item>
@@ -124,6 +122,9 @@ export default defineComponent({
       )
     }
     const cells = await getCells('type', sudtInfoTypeScript)
+    if (cells.length === 0) {
+      return
+    }
     const newewstCell = cells.sort(
       (cell1: UnderscoreCell, cell2: UnderscoreCell) => {
         return Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))
@@ -157,7 +158,6 @@ export default defineComponent({
       this.visible = true
     },
     handleCancel() {
-      console.log('Clicked cancel button')
       this.visible = false
     },
     handleSubmit: async function (): Promise<Record<string, unknown> | undefined> {

@@ -20,11 +20,10 @@ export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free:
   }
 }
 
-export const parseBigIntFloat = function (number: bigint, decimal = 8): number {
+export const parseBigIntStringNumber = function (number: bigint, decimal = 8): string {
   const stringBigInt = number.toString()
   const length = stringBigInt.length
-  const stringNumber = `${stringBigInt.slice(0, length - decimal)}.${stringBigInt.slice(decimal)}`
-  return +stringNumber
+  return `${stringBigInt.slice(0, length - decimal)}.${stringBigInt.slice(length - decimal)}`
 }
 
 export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {

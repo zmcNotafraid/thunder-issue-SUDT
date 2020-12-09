@@ -2,7 +2,7 @@
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-form-item label="Burn Count">
       <a-input v-model:value="form.burnCount" type="number" />
-      <span>Avaiable CKB: {{ currentSudtCount }}</span>
+      <span>Avaiable SUDT: {{ currentSudtCount }}</span>
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
@@ -28,7 +28,7 @@ import {
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
-  parseBigIntFloat
+  parseBigIntStringNumber
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -36,7 +36,7 @@ export default defineComponent({
   data() {
     return {
       form: {
-        burnCount: "0"
+        burnCount: 0 as number
       },
       inputCells: [] as Array<UnderscoreCell>,
       fromSudtCells: [] as Array<UnderscoreCell>,
@@ -56,7 +56,7 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
-      this.currentSudtCount = parseBigIntFloat(this.originalSudtCount).toString()
+      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount)
     }
   },
   methods: {
@@ -88,7 +88,8 @@ export default defineComponent({
       const originalSudtCount = calSudtAmount(this.fromSudtCells)
       const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
       const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
-      const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount) * BigInt(10 ** decimal))
+      const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount * 10 ** decimal))
+      debugger
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),

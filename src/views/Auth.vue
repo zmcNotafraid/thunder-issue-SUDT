@@ -40,7 +40,7 @@ import {
   requestAuth,
   SECP256K1_BLAKE160_CODE_HASH,
   calCapacityAmount,
-  parseBigIntFloat,
+  parseBigIntStringNumber,
   sudtTypeScript,
   compareScript,
   underscoreScriptKey,
@@ -52,10 +52,10 @@ export default defineComponent({
   data() {
     return {
       address: "",
-      free: 0,
-      capacity: 0,
+      free: "0",
+      capacity: "0",
       loading: false,
-      tokenAmount: 0
+      tokenAmount: "0"
     }
   },
   mounted() {
@@ -110,11 +110,11 @@ export default defineComponent({
 
         const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
         if (sudtCells.length > 0) {
-          this.tokenAmount = parseBigIntFloat(calSudtAmount(sudtCells))
+          this.tokenAmount = parseBigIntStringNumber(calSudtAmount(sudtCells))
         }
         const summary = calCapacityAmount(cells)
-        this.free = parseBigIntFloat(summary.free) || 0
-        this.capacity = parseBigIntFloat(summary.capacity) || 0
+        this.free = parseBigIntStringNumber(summary.free) || "0"
+        this.capacity = parseBigIntStringNumber(summary.capacity) || "0"
         message.success("Auth Success!")
       } catch (error) {
         message.error(error.message)
