@@ -22,10 +22,7 @@
       </a-descriptions-item>
     </a-descriptions>
     <br>
-    <a-descriptions title="Your SUDT" bordered>
-      <a-descriptions-item label="Args">
-        {{ tokenArgs }}
-      </a-descriptions-item>
+    <a-descriptions title="Issued SUDT" bordered>
       <a-descriptions-item label="Amount">
         {{ tokenAmount }}
       </a-descriptions-item>
@@ -58,7 +55,6 @@ export default defineComponent({
       free: 0,
       capacity: 0,
       loading: false,
-      tokenArgs: "",
       tokenAmount: 0
     }
   },
@@ -114,7 +110,6 @@ export default defineComponent({
 
         const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
         if (sudtCells.length > 0) {
-          this.tokenArgs = sudtCells[0].output.type.args
           this.tokenAmount = parseBigIntFloat(calSudtAmount(sudtCells))
         }
         const summary = calCapacityAmount(cells)

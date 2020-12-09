@@ -279,7 +279,7 @@ export default defineComponent({
                       Information:%0a%0d
                         Full Name: ${this.name}%0a%0d
                         Symbol: ${this.symbol}%0a%0d
-                        Decimal: ${this.decimal}%0%0a%0d
+                        Decimal: ${this.decimal}%0a%0d
                         Description:%0a%0d
                         Website:%0a%0d
                         Icon File: attachment (40 x 40)%0a%0d

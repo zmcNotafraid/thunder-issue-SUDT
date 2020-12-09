@@ -1,8 +1,8 @@
 <template>
   <a-space direction="vertical">
     <a-row type="flex" justify="end" style="color: red">
-        <a-col :span="22"> <li>If you don't checked the ACP, you will create a SECP256K1/blake160 SUDT cell.</li></a-col>
-        <a-col :span="22"> <li>When you check the ACP, if receiver already has ACP cell, you will directly transfer to this cell.Otherwise, you will create a new ACP cell.</li></a-col>
+        <a-col :span="22"> <li>If you don't check the ACP, you will create a SECP256K1/blake160 SUDT cell for receiver.</li></a-col>
+        <a-col :span="22"> <li>When you check the ACP, if receiver already has an ACP cell, you will transfer to this cell.Otherwise, you will create a new ACP cell.</li></a-col>
     </a-row>
     <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
       <a-form-item label="To Address">
@@ -71,6 +71,7 @@ export default defineComponent({
     if (inputCells.length === 0) {
       message.error("No Available Cells!")
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
