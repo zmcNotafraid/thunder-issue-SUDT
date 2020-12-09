@@ -9,21 +9,20 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@nervosnetwork/ckb-sdk-core": "0.37.0",
-    "@nervosnetwork/ckb-sdk-rpc": "0.37.0",
-    "@nervosnetwork/ckb-sdk-utils": "0.37.0",
-    "ant-design-vue": "^2.0.0-beta.15",
-    "ckb-js-toolkit": "^0.9.2",
-    "core-js": "^3.6.5",
+    "@nervosnetwork/ckb-sdk-core": "0.38.2",
+    "@nervosnetwork/ckb-sdk-rpc": "0.38.2",
+    "@nervosnetwork/ckb-sdk-utils": "0.38.2",
+    "ant-design-vue": "2.0.0-rc.2",
+    "core-js": "3",
     "less": "^3.12.2",
     "less-loader": "^7.0.1",
     "moment": "^2.29.1",
-    "vue": "^3.0.0-0",
-    "vue-class-component": "^8.0.0-0",
+    "vue": "3.0.4",
+    "vue-class-component": "8.0.0-rc.1",
     "vue-router": "^4.0.0-beta.13"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.19",
+    "@types/jest": "26.0.18",
     "@types/node": "^14.14.6",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
@@ -43,7 +42,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^7.0.0-0",
-    "typescript": "4.0.3",
-    "vue-jest": "^5.0.0-0"
+    "typescript": "4.1.2",
+    "vue-jest": "5.0.0-alpha.7"
   }
 }
