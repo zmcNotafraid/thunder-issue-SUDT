@@ -76,6 +76,11 @@ export default defineComponent({
 
       try {
         const results: AccountList = await queryAddresses(authToken)
+        if (results === undefined) {
+          message.error("Can't find your address.Please auth again.")
+          return
+        }
+
         const addresses: Array<Account> = results.addresses
         const address = addresses.filter(
           (address: Account) =>
