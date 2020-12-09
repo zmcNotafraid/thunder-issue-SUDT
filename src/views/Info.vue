@@ -107,7 +107,7 @@ export default defineComponent({
   async mounted() {
     const authToken: string | null = window.localStorage.getItem('authToken')
     if (!authToken) {
-      console.error('No auth token')
+      message.error('No auth token')
       return
     }
 

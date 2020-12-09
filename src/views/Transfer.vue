@@ -82,7 +82,7 @@ export default defineComponent({
     onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem("authToken")
       if (!authToken) {
-        console.error("No auth token")
+        message.error("No auth token")
         return
       }
 

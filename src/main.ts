@@ -11,7 +11,6 @@ import {
   Row,
   Col,
   Checkbox,
-  message,
   Space,
   Descriptions,
   Divider,
@@ -29,7 +28,6 @@ app.use(Input)
 app.use(Row)
 app.use(Col)
 app.use(Checkbox)
-app.use(message)
 app.use(Space)
 app.use(Descriptions)
 app.use(Divider)

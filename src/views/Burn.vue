@@ -89,7 +89,6 @@ export default defineComponent({
       const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
       const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
       const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount * 10 ** decimal))
-      debugger
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
