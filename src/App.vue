@@ -11,8 +11,8 @@
         </span>
       </div>
       <a-divider />
-      <a-menu theme="dark" mode="inline" v-model:selectedKeys="selectedKeys">
-        <a-menu-item key="1">
+      <a-menu theme="dark" mode="inline" :selected-keys="[this.$route.path]">
+        <a-menu-item key="/">
           <router-link to="/">
             <HomeFilled />
             <span class="nav-text">
@@ -20,7 +20,7 @@
             </span>
           </router-link>
         </a-menu-item>
-        <a-menu-item key="2">
+        <a-menu-item key="/issue">
           <router-link to="/issue">
             <MoneyCollectFilled />
             <span class="nav-text">
@@ -28,7 +28,7 @@
             </span>
           </router-link>
         </a-menu-item>
-        <a-menu-item key="3">
+        <a-menu-item key="/transfer">
           <router-link to="/transfer">
             <InteractionFilled />
             <span class="nav-text">
@@ -36,7 +36,7 @@
             </span>
           </router-link>
         </a-menu-item>
-        <a-menu-item key="4">
+        <a-menu-item key="/burn">
           <router-link to="/burn">
             <FireFilled />
             <span class="nav-text">
@@ -44,7 +44,7 @@
             </span>
           </router-link>
         </a-menu-item>
-        <a-menu-item key="5">
+        <a-menu-item key="/info">
           <router-link to="/info">
             <InfoCircleFilled />
             <span class="nav-text">
@@ -84,11 +84,6 @@ import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyColl
   }
 })
 export default class App extends Vue {
-  data() {
-    return {
-      selectedKeys: ["1"]
-    }
-  }
 }
 </script>
 
