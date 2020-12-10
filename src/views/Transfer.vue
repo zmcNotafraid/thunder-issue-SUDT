@@ -121,7 +121,7 @@ export default defineComponent({
               txHash: process.env.VUE_APP_ACP_TX_HASH || '',
               index: process.env.VUE_APP_ACP_INDEX || '0x0'
             },
-            depType: 'code'
+            depType: 'depGroup'
           }
         )
 
