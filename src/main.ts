@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import { setupRouter } from './router'
+import { setupI18n } from './i18n'
+import en from './i18n/locales/en-US'
 import 'moment'
 import {
   Layout,
@@ -15,10 +17,19 @@ import {
   Descriptions,
   Divider,
   Spin,
-  Modal
+  Modal,
+  Dropdown
 } from 'ant-design-vue'
 
 const app = createApp(App)
+const i18n = setupI18n({
+  globalInjection: true,
+  legacy: false,
+  messages: {
+    en
+  }
+})
+const router = setupRouter(i18n)
 
 app.use(Layout)
 app.use(Menu)
@@ -33,7 +44,9 @@ app.use(Descriptions)
 app.use(Divider)
 app.use(Spin)
 app.use(Modal)
+app.use(Dropdown)
 
+app.use(i18n)
 app.use(router)
 
 app.mount("#app")

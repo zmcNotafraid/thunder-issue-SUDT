@@ -1,13 +1,23 @@
 <template>
   <a-layout id="components-layout-demo-responsive">
-    <a-layout-sider
-      breakpoint="lg"
-      collapsed-width="0"
-    >
+    <a-layout-sider breakpoint="lg" collapsed-width="0">
       <div class="logo">
         <span>
-          <ThunderboltFilled style='color: yellow'/>
+          <ThunderboltFilled style="color: yellow" />
           Thunder Issue SUDT
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="e => e.preventDefault()"> {{ locale }}<DownOutlined /> </a>
+            <template #overlay>
+              <a-menu @click="switchLocale">
+                <a-menu-item key="zh-CN">
+                  <a href="javascript:;">简体中文</a>
+                </a-menu-item>
+                <a-menu-item key="en-US">
+                  <a href="javascript:;">EN</a>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
         </span>
       </div>
       <a-divider />
@@ -15,47 +25,36 @@
         <a-menu-item key="/">
           <router-link to="/">
             <HomeFilled />
-            <span class="nav-text">
-              Wallet Auth
-            </span>
+            <span class="nav-text"> Wallet Auth </span>
           </router-link>
         </a-menu-item>
         <a-menu-item key="/issue">
           <router-link to="/issue">
             <MoneyCollectFilled />
-            <span class="nav-text">
-              Issue Token
-            </span>
+            <span class="nav-text"> Issue Token </span>
           </router-link>
         </a-menu-item>
         <a-menu-item key="/transfer">
           <router-link to="/transfer">
             <InteractionFilled />
-            <span class="nav-text">
-              Transfer Token
-            </span>
+            <span class="nav-text"> Transfer Token </span>
           </router-link>
         </a-menu-item>
         <a-menu-item key="/burn">
           <router-link to="/burn">
             <FireFilled />
-            <span class="nav-text">
-              Burn Token
-            </span>
+            <span class="nav-text"> Burn Token </span>
           </router-link>
         </a-menu-item>
         <a-menu-item key="/info">
           <router-link to="/info">
             <InfoCircleFilled />
-            <span class="nav-text">
-              Token Info
-            </span>
+            <span class="nav-text"> Token Info </span>
           </router-link>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>
-      <a-layout-header :style="{ background: '#fff', padding: 0 }" />
       <a-layout-content :style="{ margin: '24px 16px 0' }">
         <div :style="{ padding: '24px', background: '#fff', height: '100%' }">
           <router-view></router-view>
@@ -70,21 +69,39 @@
 
 <script lang="ts">
 import 'ant-design-vue/dist/antd.css'
-import { Options, Vue } from "vue-class-component"
-import { HomeFilled, ThunderboltFilled, InteractionFilled, FireFilled, MoneyCollectFilled, InfoCircleFilled } from "@ant-design/icons-vue"
+import { defineComponent } from "vue"
+import {
+  HomeFilled,
+  ThunderboltFilled,
+  InteractionFilled,
+  FireFilled,
+  MoneyCollectFilled,
+  InfoCircleFilled,
+  DownOutlined
+} from "@ant-design/icons-vue"
 
-@Options({
+export default defineComponent({
   components: {
     HomeFilled,
     ThunderboltFilled,
     InteractionFilled,
     FireFilled,
     MoneyCollectFilled,
-    InfoCircleFilled
+    InfoCircleFilled,
+    DownOutlined
+  },
+  data () {
+    return {
+      locale: window.localStorage.getItem("locale") === 'zh-CN' ? "简体中文" : "EN"
+    }
+  },
+  methods: {
+    switchLocale: function ({ key }: Record<string, string>) {
+      window.localStorage.setItem('locale', key)
+      setTimeout(this.$router.go, 1000)
+    }
   }
 })
-export default class App extends Vue {
-}
 </script>
 
 <style>
@@ -100,6 +117,6 @@ export default class App extends Vue {
   color: white;
 }
 .nav-text > a {
-  color: white
+  color: white;
 }
 </style>

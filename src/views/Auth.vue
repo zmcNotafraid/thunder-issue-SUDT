@@ -4,7 +4,7 @@
     <a-col :span="6">
       <div class="Auth">
         <a-button type="primary" @click="getAuth">
-          Request Auth
+          {{ $t('buttons.connect') }}
         </a-button>
       </div>
     </a-col>
@@ -47,8 +47,13 @@ import {
   calSudtAmount
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell, Account, AccountList } from "../interface/index"
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
+  setup() {
+    const { t, locale } = useI18n()
+    return { t, locale }
+  },
   data() {
     return {
       address: "",
