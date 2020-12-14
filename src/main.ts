@@ -18,7 +18,8 @@ import {
   Divider,
   Spin,
   Modal,
-  Dropdown
+  Dropdown,
+  InputNumber
 } from 'ant-design-vue'
 
 const app = createApp(App)
@@ -36,6 +37,7 @@ app.use(Menu)
 app.use(Button)
 app.use(Form)
 app.use(Input)
+app.use(InputNumber)
 app.use(Row)
 app.use(Col)
 app.use(Checkbox)

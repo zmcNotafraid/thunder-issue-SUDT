@@ -1,25 +1,30 @@
 <template>
-  <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="Token Total Supply Count">
-      <a-input v-model:value="form.count" type="number" min="1" step="1" />
+  <a-form
+    ref="ruleForm"
+    :rules="rules"
+    :model="form"
+    :label-col="labelCol"
+    :wrapper-col="wrapperCol"
+  >
+    <a-form-item ref="count" label="Token Initial Supply Count" name="count">
+      <a-input-number v-model:value="form.count" :min=1 style="width: 150px" />
     </a-form-item>
-    <a-form-item label="Token Name">
-      <a-input v-model:value="form.name" placeholder="nervos token" />
+    <a-form-item label="Token Name" name="name">
+      <a-input v-model:value="form.name" placeholder="nervos token"/>
     </a-form-item>
-    <a-form-item label="Token Symbol">
+    <a-form-item label="Token Symbol" name="symbol">
       <a-input v-model:value="form.symbol" placeholder="CKB" />
     </a-form-item>
-    <a-form-item label="Token Decimal">
-      <a-input
+    <a-form-item label="Token Decimal" name="decimal">
+      <a-input-number
         v-model:value="form.decimal"
-        type="number"
-        min="0"
-        step="1"
+        :min=0
+        :max=38
         placeholder="default is 8"
       />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="checkIssued"> Submit </a-button>
+      <a-button type="primary" @click="checkFormValidate"> Submit </a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -40,7 +45,6 @@ import {
   sudtTypeScript,
   getCells,
   underscoreScriptKey,
-  parseSudtInfoData,
   SUDT_SMALLEST_CAPACITY
 } from '@/utils'
 import { UnderscoreCell } from '../interface/index'
@@ -56,7 +60,24 @@ export default defineComponent({
       },
       issued: false,
       labelCol: { span: 4 },
-      wrapperCol: { span: 10 }
+      wrapperCol: { span: 10 },
+      rules: {
+        count: [
+          { type: 'integer', required: true, message: 'Please input supply count', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: 'Please input token name', trigger: 'blur' },
+          { max: 32, message: 'The max length is 32', trigger: 'blur' }
+        ],
+        symbol: [
+          { required: true, message: 'Please input symbol', trigger: 'blur' },
+          { max: 8, message: 'The max length is 8', trigger: 'blur' }
+        ],
+        decimal: [
+          { type: 'integer', required: true, message: 'Please input decimal', trigger: 'blur' },
+          { type: 'integer', min: 0, max: 38, message: 'The decimal should be 0 to 38', trigger: 'blur' }
+        ]
+      }
     }
   },
   async mounted() {
@@ -66,14 +87,19 @@ export default defineComponent({
     }
   },
   methods: {
-    checkIssued: function () {
-      if (this.issued) {
-        if (confirm('Are you sure you want additional issue')) {
-          return this.onSubmit()
-        }
-      } else {
-        return this.onSubmit()
-      }
+    checkFormValidate: function () {
+      // TODO: Fix any
+      (this.$refs.ruleForm as HTMLFormElement)
+        .validate()
+        .then(() => {
+          if (this.issued) {
+            if (confirm('Are you sure you want additional issue')) {
+              return this.onSubmit()
+            }
+          } else {
+            return this.onSubmit()
+          }
+        })
     },
     onSubmit: async function (): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem('authToken')
@@ -90,7 +116,6 @@ export default defineComponent({
       const sudtInfoCapacity = BigInt(170 * 10 ** 8)
       let restCapacity =
           BigInt(cell.output.capacity) - SUDT_SMALLEST_CAPACITY - sudtInfoCapacity
-      let totalSupply = BigInt(this.form.count)
 
       rawTx.cellDeps.push({
         outPoint: {
@@ -133,11 +158,6 @@ export default defineComponent({
         })
         rawTx.witnesses.push('0x')
         restCapacity = restCapacity - BigInt(sudtInfoCells[0].output.capacity)
-        const oldTotalSupply = parseSudtInfoData(
-          sudtInfoCells[0].output_data
-        ).restInfos.filter((obj) => obj.TotalSupply !== undefined)
-
-        totalSupply = totalSupply + BigInt(oldTotalSupply[0].TotalSupply)
       }
 
       rawTx.outputs.push({
@@ -163,9 +183,7 @@ export default defineComponent({
       rawTx.outputsData.push(
           `0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(
             this.form.name
-          )}0a${stringToHex(this.form.symbol)}0a${stringToHex(
-            'TotalSupply:' + totalSupply.toString()
-          )}`
+          )}0a${stringToHex(this.form.symbol)}`
       )
 
       rawTx.outputs.push({
