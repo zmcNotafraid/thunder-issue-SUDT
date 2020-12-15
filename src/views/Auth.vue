@@ -4,7 +4,7 @@
     <a-col :span="6">
       <div class="Auth">
         <a-button type="primary" @click="getAuth">
-          {{ $t('buttons.connect') }}
+          {{ connectButton }}
         </a-button>
       </div>
     </a-col>
@@ -21,12 +21,6 @@
         {{ free }}
       </a-descriptions-item>
     </a-descriptions>
-    <br>
-    <a-descriptions title="Issued SUDT" bordered>
-      <a-descriptions-item label="Amount">
-        {{ tokenAmount }}
-      </a-descriptions-item>
-    </a-descriptions>
   </a-spin>
   </a-space>
 </template>
@@ -41,34 +35,45 @@ import {
   SECP256K1_BLAKE160_CODE_HASH,
   calCapacityAmount,
   parseBigIntStringNumber,
-  sudtTypeScript,
-  compareScript,
-  underscoreScriptKey,
-  calSudtAmount
+  underscoreScriptKey
 } from "@/utils"
-import { UnderscoreScript, UnderscoreCell, Account, AccountList } from "../interface/index"
-import { useI18n } from 'vue-i18n'
+import { UnderscoreScript, Account, AccountList } from "../interface/index"
 
 export default defineComponent({
-  setup() {
-    const { t, locale } = useI18n()
-    return { t, locale }
-  },
   data() {
     return {
       address: "",
       free: "0",
       capacity: "0",
       loading: false,
-      tokenAmount: "0"
+      tokenAmount: "0",
+      connectButton: ''
     }
   },
   mounted() {
+    this.switchConnectButtonContent()
     if (window.localStorage.getItem("authToken")) {
       this.reload()
     }
   },
+  watch: {
+    address: function () {
+      this.switchConnectButtonContent()
+    }
+  },
   methods: {
+    switchConnectButtonContent: function () {
+      if (this.address === "") {
+        this.connectButton = this.$t('buttons.connect')
+      } else {
+        if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("mainet")) {
+          this.connectButton = this.$t("buttons.connected_mainnet")
+        }
+        if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("testnet")) {
+          this.connectButton = this.$t('buttons.connected_testnet')
+        }
+      }
+    },
     reload: async function (): Promise<undefined> {
       this.loading = true
 
@@ -100,6 +105,7 @@ export default defineComponent({
 
         const defaultAddress = address[0]
         this.address = defaultAddress.address
+        window.localStorage.setItem("address", defaultAddress.address)
         window.localStorage.setItem("lockHash", defaultAddress.lockHash)
 
         const lockScript: UnderscoreScript = {
@@ -119,16 +125,17 @@ export default defineComponent({
           return
         }
 
-        const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
-        if (sudtCells.length > 0) {
-          this.tokenAmount = parseBigIntStringNumber(calSudtAmount(sudtCells))
-        }
         const summary = calCapacityAmount(cells)
         this.free = parseBigIntStringNumber(summary.free) || "0"
         this.capacity = parseBigIntStringNumber(summary.capacity) || "0"
         message.success("Auth Success!")
       } catch (error) {
-        message.error(error.message)
+        this.loading = false
+        if (error.message === "Failed to fetch") {
+          message.error("Please make sure Keypering is running, and you could download it here: https://github.com/nervosnetwork/keypering/releases")
+        } else {
+          message.error(error.message)
+        }
       }
       this.loading = false
     },
@@ -138,7 +145,11 @@ export default defineComponent({
         window.localStorage.setItem("authToken", token)
         await this.reload()
       } catch (error) {
-        message.error(error.message)
+        if (error.message === "Failed to fetch") {
+          message.error("Please make sure Keypring is running, and you could download it here: https://github.com/nervosnetwork/keypering/releases")
+        } else {
+          message.error(error.message)
+        }
       }
     }
   }
