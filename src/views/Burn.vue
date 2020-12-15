@@ -1,12 +1,12 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="Burn Count">
+    <a-form-item :label="$t('labels.burnCount')">
       <a-input v-model:value="form.burnCount" type="number" />
-      <span>Avaiable SUDT: {{ currentSudtCount }}</span>
+      <span>{{ $t("labels.availableSudt")}}: {{ currentSudtCount }}</span>
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="onSubmit">
-        Submit
+        {{ $t("buttons.submit")}}
       </a-button>
     </a-form-item>
   </a-form>
@@ -51,7 +51,7 @@ export default defineComponent({
     const inputCells = await combineInputCells()
     this.inputCells = [...inputCells]
     if (inputCells.length === 0) {
-      message.error("No Available Cells!")
+      message.error(this.$t("errors.noCells"))
     } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.biggestCapacityCell = inputCells.shift()!
@@ -64,14 +64,14 @@ export default defineComponent({
     onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem("authToken")
       if (!authToken) {
-        message.error("No auth token")
+        message.error(this.$t("errors.noAuth"))
         return
       }
 
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const fromLockScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
       if (this.inputCells.length === 0) {
-        message.error("No Available Cells!")
+        message.error(this.$t("errors.noCells"))
         return
       }
 

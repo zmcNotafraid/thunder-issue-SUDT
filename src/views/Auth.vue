@@ -10,14 +10,14 @@
     </a-col>
   </a-row>
   <a-spin tip="Loading..." :spinning="loading">
-    <a-descriptions title="Wallet Info" bordered>
-      <a-descriptions-item label="Address" :span="3">
+    <a-descriptions :title="$t('title.walletInfo')" bordered>
+      <a-descriptions-item :label="$t('labels.address')" :span="3">
         {{ address }}
       </a-descriptions-item>
-      <a-descriptions-item label="Capacity (CKB)">
+      <a-descriptions-item :label="$t('labels.capacity')">
         {{ capacity }}
       </a-descriptions-item>
-      <a-descriptions-item label="Free Capacity (CKB)">
+      <a-descriptions-item :label="$t('labels.free')">
         {{ free }}
       </a-descriptions-item>
     </a-descriptions>
@@ -34,8 +34,7 @@ import {
   requestAuth,
   SECP256K1_BLAKE160_CODE_HASH,
   calCapacityAmount,
-  parseBigIntStringNumber,
-  underscoreScriptKey
+  parseBigIntStringNumber
 } from "@/utils"
 import { UnderscoreScript, Account, AccountList } from "../interface/index"
 
@@ -67,10 +66,10 @@ export default defineComponent({
         this.connectButton = this.$t('buttons.connect')
       } else {
         if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("mainet")) {
-          this.connectButton = this.$t("buttons.connected_mainnet")
+          this.connectButton = this.$t("buttons.connectedMainnet")
         }
         if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("testnet")) {
-          this.connectButton = this.$t('buttons.connected_testnet')
+          this.connectButton = this.$t('buttons.connectedTestnet')
         }
       }
     },
@@ -79,7 +78,7 @@ export default defineComponent({
 
       const authToken = window.localStorage.getItem("authToken")
       if (!authToken) {
-        message.error("No auth token")
+        message.error(this.$t("errors.noAuth"))
         this.loading = false
         return
       }
@@ -87,7 +86,7 @@ export default defineComponent({
       try {
         const results: AccountList = await queryAddresses(authToken)
         if (results === undefined) {
-          message.error("Can't find your address.Please auth again.")
+          message.error(this.$t("errors.noAddress"))
           this.loading = false
           return
         }
@@ -99,7 +98,7 @@ export default defineComponent({
         )
         if (address.length === 0) {
           this.loading = false
-          message.error("No Secp256k1 address")
+          message.error(this.$t("errors.no256k1Address"))
           return
         }
 
@@ -121,18 +120,18 @@ export default defineComponent({
         const cells = await getCells('lock', lockScript)
         if (cells.length === 0) {
           this.loading = false
-          message.error("No avaiable cells")
+          message.error(this.$t("erros.noCells"))
           return
         }
 
         const summary = calCapacityAmount(cells)
         this.free = parseBigIntStringNumber(summary.free) || "0"
         this.capacity = parseBigIntStringNumber(summary.capacity) || "0"
-        message.success("Auth Success!")
+        message.success(this.$t("success.auth"))
       } catch (error) {
         this.loading = false
         if (error.message === "Failed to fetch") {
-          message.error("Please make sure Keypering is running, and you could download it here: https://github.com/nervosnetwork/keypering/releases")
+          message.error(this.$t("errors.keypering"))
         } else {
           message.error(error.message)
         }
@@ -146,7 +145,7 @@ export default defineComponent({
         await this.reload()
       } catch (error) {
         if (error.message === "Failed to fetch") {
-          message.error("Please make sure Keypring is running, and you could download it here: https://github.com/nervosnetwork/keypering/releases")
+          message.error(this.$t("errors.keypering"))
         } else {
           message.error(error.message)
         }

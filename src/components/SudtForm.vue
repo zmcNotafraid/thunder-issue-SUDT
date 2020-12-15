@@ -6,13 +6,13 @@
     :label-col="labelCol"
     :wrapper-col="wrapperCol"
   >
-    <a-form-item label="Token Name" name="name">
-      <a-input v-model:value="form.name" placeholder="Max length 32"/>
+    <a-form-item :label="$t('labels.tokenName')" name="name">
+      <a-input v-model:value="form.name" :placeholder="$t('placeholder.maxLength', { length: 32 })"/>
     </a-form-item>
-    <a-form-item label="Token Symbol" name="symbol">
-      <a-input v-model:value="form.symbol" placeholder="Max length 8" />
+    <a-form-item :label="$t('labels.tokenSymbol')" name="symbol">
+      <a-input v-model:value="form.symbol" :placeholder="$t('placeholder.maxLength', { length: 8 })" />
     </a-form-item>
-    <a-form-item label="Token Decimal" name="decimal">
+    <a-form-item :label="$t('labels.tokenDecimal')" name="decimal">
       <a-input-number
         v-model:value="form.decimal"
         :min=0
@@ -20,11 +20,11 @@
         placeholder="0 ~ 38"
       />
     </a-form-item>
-    <a-form-item v-if="issueSudt === true" label="Token Initial Supply Count" name="count">
+    <a-form-item v-if="issueSudt === true" :label="$t('labels.tokenCount')" name="count">
       <a-input-number v-model:value="form.count" :min=1 style="width: 150px" />
     </a-form-item>
     <a-form-item v-if="issueSudt === true" :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="checkFormValidate"> Submit </a-button>
+      <a-button type="primary" @click="checkFormValidate"> {{ $t('buttons.submit') }} </a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -61,19 +61,19 @@ const Component = defineComponent({
       },
       rules: {
         count: [
-          { type: 'integer', required: true, message: 'Please input supply count', trigger: 'blur' }
+          { type: 'integer', required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenCount") }), trigger: 'blur' }
         ],
         name: [
-          { required: true, message: 'Please input token name', trigger: 'blur' },
-          { max: 32, message: 'The max length is 32', trigger: 'blur' }
+          { required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenName") }), trigger: 'blur' },
+          { max: 32, message: this.$t("placeholder.maxLength", { length: 32 }), trigger: 'blur' }
         ],
         symbol: [
-          { required: true, message: 'Please input symbol', trigger: 'blur' },
-          { max: 8, message: 'The max length is 8', trigger: 'blur' }
+          { required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenSymbol") }), trigger: 'blur' },
+          { max: 8, message: this.$t("placeholder.maxLength", { length: 8 }), trigger: 'blur' }
         ],
         decimal: [
-          { type: 'integer', required: true, message: 'Please input decimal', trigger: 'blur' },
-          { type: 'integer', min: 0, max: 38, message: 'The decimal should be 0 to 38', trigger: 'blur' }
+          { type: 'integer', required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenDecimal") }), trigger: 'blur' },
+          { type: 'integer', min: 0, max: 38, message: this.$t('validations.decimalLength'), trigger: 'blur' }
         ]
       },
       labelCol: { span: this.labelColumn },
@@ -96,7 +96,7 @@ const Component = defineComponent({
     submit: async function(): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem('authToken')
       if (!authToken) {
-        message.error('No auth token')
+        message.error(this.$t("errors.noAuth"))
         return
       }
 

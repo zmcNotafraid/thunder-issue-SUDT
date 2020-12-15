@@ -2,11 +2,11 @@
   <div>
     <a-row>
       <a-col :span="8">
-        <a-button type="primary" @click="showModal"> Update Token Info </a-button>
+        <a-button type="primary" @click="showModal"> {{ $t('buttons.updateTokenInfo') }} </a-button>
       </a-col>
       <a-col :span="3" :offset="13">
         <a href="javascript:void(0);" @click="submitInfo">
-          Submit to ckb Explorer
+          {{ $t('buttons.submitExplorer') }}
         </a>
       </a-col>
     </a-row>
@@ -20,23 +20,23 @@
       <template v-slot:footer>
         <a-button key="back" @click="handleCancel"> Cancel </a-button>
         <a-button key="submit" type="primary" @click="handleSubmit">
-          Submit
+          {{ $t("buttons.submit") }}Submit
         </a-button>
       </template>
     </a-modal>
   </div>
   <br />
-  <a-descriptions title="Token Info" bordered>
-    <a-descriptions-item label="Name">
+  <a-descriptions :title="$t('title.tokenInfo')" bordered>
+    <a-descriptions-item :label="$t('labels.tokenName')">
       {{ name }}
     </a-descriptions-item>
-    <a-descriptions-item label="Symbol">
+    <a-descriptions-item :label="$t('labels.tokenSymbol')">
       {{ symbol }}
     </a-descriptions-item>
-    <a-descriptions-item label="Decimal">
+    <a-descriptions-item :label="$t('labels.tokenDecimal')">
       {{ decimal }}
     </a-descriptions-item>
-    <a-descriptions-item label="Issuer">
+    <a-descriptions-item :label="$t('labels.tokenIssuer')">
       {{ address }}
     </a-descriptions-item>
   </a-descriptions>
@@ -72,7 +72,7 @@ export default defineComponent({
   async mounted() {
     const authToken: string | null = window.localStorage.getItem('authToken')
     if (!authToken) {
-      message.error('No auth token')
+      message.error(this.$t("errors.noAuth"))
       return
     }
 

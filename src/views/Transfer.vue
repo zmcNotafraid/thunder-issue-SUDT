@@ -1,13 +1,13 @@
 <template>
   <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-form-item label="To Address">
+    <a-form-item :label="$t('labels.receiverAddress')">
       <a-input v-model:value="form.toAddress" />
     </a-form-item>
-    <a-form-item label="Transfer Count">
+    <a-form-item :label="$t('labels.transferCount')">
       <a-input v-model:value="form.transferCount" type="number"/>
-      <span>Avaiable SUDT: {{ currentSudtCount }}</span>
+      <span>{{ $t('labels.availableSudt') }}: {{ currentSudtCount }}</span>
     </a-form-item>
-    <a-form-item label="I will provide some extral CKB capacity for the receiver">
+    <a-form-item :label="$t('labels.provideCKB')">
       <a-checkbox v-model:checked="form.selfProvide"  />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -65,7 +65,7 @@ export default defineComponent({
     const inputCells = await combineInputCells()
     this.inputCells = [...inputCells]
     if (inputCells.length === 0) {
-      message.error("No Available Cells!")
+      message.error(this.$t("errors.noCells"))
     } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.biggestCapacityCell = inputCells.shift()!
@@ -78,7 +78,7 @@ export default defineComponent({
     onSubmit: async function(): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem("authToken")
       if (!authToken) {
-        message.error("No auth token")
+        message.error(this.$t("errors.noAuth"))
         return
       }
 
@@ -88,7 +88,7 @@ export default defineComponent({
       let restCapacity = BigInt(this.biggestCapacityCell.output.capacity)
 
       if (this.inputCells.length === 0) {
-        message.error("No Available Cells!")
+        message.error(this.$t("errors.noCells"))
         return
       }
 
@@ -108,12 +108,12 @@ export default defineComponent({
       const receiverSudtAcpLiveCells = receiverLockCells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
       if (!this.form.selfProvide) {
         if (![process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
-          message.error("You cannot send token to this kind of address if you don't provide the necessary CKB capacity.")
+          message.error(this.$t("errors.provideCkbNeeded"))
           return
         }
 
         if (receiverSudtAcpLiveCells.length === 0) {
-          message.error("Receiver has no available asset account, please ask him create one first.")
+          message.error(this.$t("errors.noAcpCell"))
           return
         }
       }

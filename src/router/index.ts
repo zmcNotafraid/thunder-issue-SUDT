@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import { setI18nLanguage, loadLocaleMessages } from '../i18n'
-import type { I18n, Locale, Composer } from 'vue-i18n'
+import type { I18n, Locale } from 'vue-i18n'
 import Auth from '../views/Auth.vue'
 import Burn from '../views/Burn.vue'
 import Info from '../views/Info.vue'
