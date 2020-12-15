@@ -38,7 +38,9 @@ import {
   calCapacityAmount,
   parseBigIntStringNumber,
   getCells,
-  underscoreScriptKey
+  underscoreScriptKey,
+  ACP_CELL_DEP,
+  PW_CELL_DEP
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -117,14 +119,8 @@ export default defineComponent({
       }
 
       if ([process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
-        const type = receiverLockScript.codeHash === process.env.VUE_APP_ACP_CODE_HASH ? "ACP" : "PW"
-        rawTx.cellDeps.push({
-          outPoint: {
-            txHash: process.env[`VUE_APP_${type}_TX_HASH`] || '',
-            index: process.env[`VUE_APP_${type}_INDEX`] || '0x0'
-          },
-          depType: 'depGroup'
-        })
+        const cellDep = receiverLockScript.codeHash === process.env.VUE_APP_ACP_CODE_HASH ? ACP_CELL_DEP : PW_CELL_DEP
+        rawTx.cellDeps.push(cellDep)
 
         if (receiverSudtAcpLiveCells.length > 0) {
           inputSignConfig = {

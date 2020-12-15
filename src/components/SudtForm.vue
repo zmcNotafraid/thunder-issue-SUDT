@@ -41,6 +41,7 @@ import {
   stringToHex,
   FEE_RATIO,
   signAndSendTransaction,
+  SUDT_INFO_CELL_DEP,
   SUDT_INFO_SMALLEST_CAPACITY,
   SUDT_SMALLEST_CAPACITY,
   SUDT_TYPE_SCRIPT,
@@ -122,13 +123,7 @@ const Component = defineComponent({
         rawTx.cellDeps.shift()
       }
 
-      rawTx.cellDeps.push({
-        outPoint: {
-          txHash: process.env.VUE_APP_SUDT_INFO_TX_HASH as string,
-          index: process.env.VUE_APP_SUDT_INFO_INDEX as string
-        },
-        depType: 'code'
-      })
+      rawTx.cellDeps.push(SUDT_INFO_CELL_DEP)
 
       rawTx.inputs.push({
         previousOutput: {

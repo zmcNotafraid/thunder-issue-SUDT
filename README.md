@@ -23,7 +23,7 @@ Feature List:
     yarn install
     ```
 
-3. Copy ```.env.example``` file to ```.env.local```, modify SUDT and ACP Script. (Default is CKB testnet script)
+3. Copy ```.env.example``` file to ```.env```, then edit file to choose testnet or mainnet environment
 
 4. Run App
 

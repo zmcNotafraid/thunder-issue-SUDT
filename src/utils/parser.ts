@@ -1,4 +1,5 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
+import { SUDT_CELL_DEP } from './index'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
 
 export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
@@ -30,13 +31,7 @@ export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {
   return {
     version: '0x0',
     cellDeps: [
-      {
-        outPoint: {
-          txHash: process.env.VUE_APP_SUDT_TX_HASH || '',
-          index: process.env.VUE_APP_SUDT_INDEX || '0x0'
-        },
-        depType: 'code'
-      }
+      SUDT_CELL_DEP
     ],
     headerDeps: [],
     inputs: [],
