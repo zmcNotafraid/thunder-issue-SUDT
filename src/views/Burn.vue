@@ -24,7 +24,7 @@ import {
   toUint128Le,
   combineInputCells,
   FEE_RATIO,
-  sudtTypeScript,
+  SUDT_TYPE_SCRIPT,
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
@@ -53,6 +53,7 @@ export default defineComponent({
     if (inputCells.length === 0) {
       message.error("No Available Cells!")
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
@@ -92,7 +93,7 @@ export default defineComponent({
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
-        type: sudtTypeScript
+        type: SUDT_TYPE_SCRIPT
       })
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 

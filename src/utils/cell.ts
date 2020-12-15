@@ -1,4 +1,4 @@
-import { getCells, compareScript, sudtTypeScript, underscoreScriptKey } from "./index"
+import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
@@ -9,7 +9,7 @@ export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   }
   const biggestCapacityCell = cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
 
-  const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
+  const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
   if (sudtCells.length > 0) {
     return [biggestCapacityCell].concat(sudtCells)
   } else {
