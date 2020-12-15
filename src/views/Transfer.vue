@@ -1,27 +1,21 @@
 <template>
-  <a-space direction="vertical">
-    <a-row type="flex" justify="end" style="color: red">
-        <a-col :span="22"> <li>If you don't check the ACP, you will create a SECP256K1/blake160 SUDT cell for receiver.</li></a-col>
-        <a-col :span="22"> <li>When you check the ACP, if receiver already has an ACP cell, you will transfer to this cell.Otherwise, you will create a new ACP cell.</li></a-col>
-    </a-row>
-    <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-      <a-form-item label="To Address">
-        <a-input v-model:value="form.toAddress" />
-      </a-form-item>
-      <a-form-item label="Transfer Count">
-        <a-input v-model:value="form.transferCount" type="number"/>
-        <span>Avaiable SUDT: {{ currentSudtCount }}</span>
-      </a-form-item>
-      <a-form-item label="ACP">
-        <a-checkbox v-model:checked="form.acp"  />
-      </a-form-item>
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-button type="primary" @click="onSubmit">
-          Submit
-        </a-button>
-      </a-form-item>
-    </a-form>
-  </a-space>
+  <a-form :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
+    <a-form-item label="To Address">
+      <a-input v-model:value="form.toAddress" />
+    </a-form-item>
+    <a-form-item label="Transfer Count">
+      <a-input v-model:value="form.transferCount" type="number"/>
+      <span>Avaiable SUDT: {{ currentSudtCount }}</span>
+    </a-form-item>
+    <a-form-item label="I will provide some extral CKB capacity for the receiver">
+      <a-checkbox v-model:checked="form.selfProvide"  />
+    </a-form-item>
+    <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-button type="primary" @click="onSubmit">
+        Submit
+      </a-button>
+    </a-form-item>
+  </a-form>
 </template>
 
 <script lang='ts'>
@@ -38,7 +32,7 @@ import {
   toUint128Le,
   combineInputCells,
   FEE_RATIO,
-  sudtTypeScript,
+  SUDT_TYPE_SCRIPT,
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
@@ -54,14 +48,14 @@ export default defineComponent({
       form: {
         toAddress: '',
         transferCount: "0",
-        acp: false
+        selfProvide: false
       },
       inputCells: [] as Array<UnderscoreCell>,
       fromSudtCells: [] as Array<UnderscoreCell>,
       biggestCapacityCell: {} as UnderscoreCell,
       originalSudtCount: 0n,
       currentSudtCount: "0",
-      labelCol: { span: 4 },
+      labelCol: { span: 6 },
       wrapperCol: { span: 10 }
     }
   },
@@ -89,6 +83,7 @@ export default defineComponent({
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const fromLockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
       let inputSignConfig = { index: 0, length: -1 }
+      let restCapacity = BigInt(this.biggestCapacityCell.output.capacity)
 
       if (this.inputCells.length === 0) {
         message.error("No Available Cells!")
@@ -106,26 +101,32 @@ export default defineComponent({
         rawTx.witnesses.push("0x")
       })
 
-      const toLockScript = addressToScript(this.form.toAddress)
-      const toAcpScript: UnderscoreScript = {
-        code_hash: process.env.VUE_APP_ACP_CODE_HASH || '',
-        hash_type: process.env.VUE_APP_ACP_HASH_TYPE as CKBComponents.ScriptHashType,
-        args: toLockScript.args
-      }
-      const toAcpCells = await getCells('lock', toAcpScript)
-      const toSudtAcpLiveCells = toAcpCells.filter((acp: UnderscoreCell) => { return compareScript(acp.output.type, underscoreScriptKey(sudtTypeScript)) })
-      if (this.form.acp === true) {
-        rawTx.cellDeps.push(
-          {
-            outPoint: {
-              txHash: process.env.VUE_APP_ACP_TX_HASH || '',
-              index: process.env.VUE_APP_ACP_INDEX || '0x0'
-            },
-            depType: 'depGroup'
-          }
-        )
+      const receiverLockScript = addressToScript(this.form.toAddress)
+      const receiverLockCells = await getCells('lock', underscoreScriptKey(receiverLockScript))
+      const receiverSudtAcpLiveCells = receiverLockCells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
+      if (!this.form.selfProvide) {
+        if (![process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
+          message.error("You cannot send token to this kind of address if you don't provide the necessary CKB capacity.")
+          return
+        }
 
-        if (toSudtAcpLiveCells.length > 0) {
+        if (receiverSudtAcpLiveCells.length === 0) {
+          message.error("Receiver has no available asset account, please ask him create one first.")
+          return
+        }
+      }
+
+      if ([process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
+        const type = receiverLockScript.codeHash === process.env.VUE_APP_ACP_CODE_HASH ? "ACP" : "PW"
+        rawTx.cellDeps.push({
+          outPoint: {
+            txHash: process.env[`VUE_APP_${type}_TX_HASH`] || '',
+            index: process.env[`VUE_APP_${type}_INDEX`] || '0x0'
+          },
+          depType: 'depGroup'
+        })
+
+        if (receiverSudtAcpLiveCells.length > 0) {
           inputSignConfig = {
             index: 0,
             length: this.inputCells.length
@@ -133,34 +134,36 @@ export default defineComponent({
 
           rawTx.inputs.push({
             previousOutput: {
-              txHash: toSudtAcpLiveCells[0].out_point.tx_hash,
-              index: toSudtAcpLiveCells[0].out_point.index
+              txHash: receiverSudtAcpLiveCells[0].out_point.tx_hash,
+              index: receiverSudtAcpLiveCells[0].out_point.index
             },
             since: "0x0"
           })
           rawTx.witnesses.push("0x")
           rawTx.outputs.push({
-            capacity: toSudtAcpLiveCells[0].output.capacity,
-            lock: camelCaseScriptKey(toAcpScript),
-            type: sudtTypeScript
+            capacity: receiverSudtAcpLiveCells[0].output.capacity,
+            lock: receiverLockScript,
+            type: SUDT_TYPE_SCRIPT
           })
-          const originalToSudtCount = readBigUInt128LE(toSudtAcpLiveCells[0].output_data.slice(2))
+          const originalToSudtCount = readBigUInt128LE(receiverSudtAcpLiveCells[0].output_data.slice(2))
           rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
         } else {
           rawTx.outputs.push({
             capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
-            lock: camelCaseScriptKey(toAcpScript),
-            type: sudtTypeScript
+            lock: receiverLockScript,
+            type: SUDT_TYPE_SCRIPT
           })
           rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
+          restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         }
       } else {
         rawTx.outputs.push({
           capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
-          lock: toLockScript,
-          type: sudtTypeScript
+          lock: receiverLockScript,
+          type: SUDT_TYPE_SCRIPT
         })
         rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
+        restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
       }
 
       const originalSudtCount = calSudtAmount(this.fromSudtCells)
@@ -170,12 +173,12 @@ export default defineComponent({
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
-        type: sudtTypeScript
+        type: SUDT_TYPE_SCRIPT
       })
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(this.biggestCapacityCell.output.capacity) - SUDT_SMALLEST_CAPACITY).toString(16)}`,
+        capacity: `0x${restCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
         type: null
       })
