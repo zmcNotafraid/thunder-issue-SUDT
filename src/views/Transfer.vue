@@ -105,6 +105,7 @@ export default defineComponent({
 
       const receiverLockScript = addressToScript(this.form.toAddress)
       const receiverLockCells = await getCells('lock', underscoreScriptKey(receiverLockScript))
+      SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
       const receiverSudtAcpLiveCells = receiverLockCells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
       if (!this.form.selfProvide) {
         if (![process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {

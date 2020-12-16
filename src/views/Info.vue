@@ -119,6 +119,7 @@ export default defineComponent({
       return (this.$refs.sudtInfoForm as HTMLFormElement).checkFormValidate()
     },
     submitInfo() {
+      SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
       const TOKEN_EMAIL_BODY = `
                         Title: Submit Token Information%0a%0d
                         Type Script:%0a%0d

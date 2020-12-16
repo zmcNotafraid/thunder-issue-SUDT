@@ -1,8 +1,8 @@
 export default {
   buttons: {
     connect: 'Connect Wallet',
-    connectedTestnet: 'Connect Wallet(Testnet)',
-    connectedMainnet: 'Connect Wallet(Mainnet)',
+    connectedTestnet: 'Connected(Testnet)',
+    connectedMainnet: 'Connected(Mainnet)',
     submit: 'Submit',
     updateTokenInfo: "Update Token Info",
     submitExplorer: "Submit to ckb Explorer"

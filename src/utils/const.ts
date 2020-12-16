@@ -7,7 +7,7 @@ export const SUDT_INFO_SMALLEST_CAPACITY = BigInt(169 * 10 ** 8)
 export const SUDT_TYPE_SCRIPT: CKBComponents.Script = {
   codeHash: process.env.VUE_APP_SUDT_CODE_HASH!,
   hashType: process.env.VUE_APP_SUDT_HASH_TYPE as CKBComponents.ScriptHashType,
-  args: window.localStorage.getItem("lockHash") || ''
+  args: ""
 }
 export const SUDT_CELL_DEP: CKBComponents.CellDep = {
   outPoint: {

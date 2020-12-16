@@ -107,6 +107,7 @@ const Component = defineComponent({
       )
       let restCapacity = BigInt(cell.output.capacity) - SUDT_INFO_SMALLEST_CAPACITY
       if (this.issueSudt) {
+        SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         rawTx.outputs.push({
           capacity: `0x${SUDT_SMALLEST_CAPACITY.toString(16)}`,
