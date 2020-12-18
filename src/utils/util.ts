@@ -1,7 +1,7 @@
 import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey, getTransaction } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 import { Modal } from 'ant-design-vue'
-import { ModalFunc, ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
+import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)

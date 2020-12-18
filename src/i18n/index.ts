@@ -3,7 +3,7 @@ import type { I18n, Locale, I18nOptions, Composer } from 'vue-i18n'
 
 export function setupI18n(options: I18nOptions = { locale: 'en-US' }): I18n {
   const i18n = createI18n(options) as I18n
-  setI18nLanguage(i18n, options.locale!)
+  setI18nLanguage(i18n, options.locale as string)
   return i18n
 }
 
