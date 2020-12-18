@@ -17,7 +17,7 @@ export default {
     tokenSymbol: 'Token Symbol',
     tokenDecimal: 'Token Decimal',
     tokenIssuer: 'Token Issuer',
-    tokenCount: 'Token Initial Supply Count',
+    tokenCount: 'Issue amount',
     receiverAddress: 'Receiver Address',
     transferCount: 'Transfer Token Count',
     provideCKB: 'I will provide some extra CKB capacity for the receiver'

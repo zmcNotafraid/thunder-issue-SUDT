@@ -17,7 +17,7 @@ export default {
     tokenSymbol: '代币符号',
     tokenDecimal: '代币小数位',
     tokenIssuer: '发行者地址',
-    tokenCount: '代币发行总量',
+    tokenCount: '发行',
     receiverAddress: '接收者地址',
     transferCount: '转账代币数量',
     provideCKB: '我为接收者提供需要的CKB'

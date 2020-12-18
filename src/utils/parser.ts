@@ -76,23 +76,32 @@ export const hexToString = (hex: string): string => {
   return Buffer.from(hex, 'hex').toString('utf-8')
 }
 
-export const parseSudtInfoData = (data: string): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>>} => {
-  const [decimal, name, symbol, ...other] = data.slice(2).split("0a")
-  let restInfos: Array<Record<string, unknown>> = []
-  if (other !== [""]) {
-    restInfos = other.map(field => {
-      const key: string = field.split("3a")[0]
-      const value: string = field.split("3a")[1]
-      const _obj: Record<string, unknown> = {}
-      _obj[hexToString(key)] = hexToString(value)
-      return _obj
-    })
-  }
-  return {
-    decimal: parseInt(decimal),
-    name: hexToString(name),
-    symbol: hexToString(symbol),
-    restInfos: restInfos
+export const parseSudtInfoData = (data: string): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
+  try {
+    const [decimal, name, symbol, ...other] = data.slice(2).split("0a")
+    let restInfos: Array<Record<string, unknown>> = []
+    if (other !== [""]) {
+      restInfos = other.map(field => {
+        const key: string = field.split("3a")[0]
+        const value: string = field.split("3a")[1]
+        const _obj: Record<string, unknown> = {}
+        _obj[hexToString(key)] = hexToString(value)
+        return _obj
+      })
+    }
+    return {
+      decimal: parseInt(decimal),
+      name: hexToString(name),
+      symbol: hexToString(symbol),
+      restInfos: restInfos
+    }
+  } catch (error) {
+    return {
+      decimal: -1,
+      name: "",
+      symbol: "",
+      restInfos: [{}]
+    }
   }
 }
 

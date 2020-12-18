@@ -6,21 +6,24 @@
     :label-col="labelCol"
     :wrapper-col="wrapperCol"
   >
-    <a-form-item :label="$t('labels.tokenName')" name="name">
+    <a-form-item :label="$t('labels.tokenName')" name="name" >
       <a-input
         v-model:value="form.name"
+        :disabled="issueSudt && infoExist"
         :placeholder="$t('placeholder.maxLength', { length: 32 })"
       />
     </a-form-item>
     <a-form-item :label="$t('labels.tokenSymbol')" name="symbol">
       <a-input
         v-model:value="form.symbol"
+        :disabled="issueSudt && infoExist"
         :placeholder="$t('placeholder.maxLength', { length: 8 })"
       />
     </a-form-item>
     <a-form-item :label="$t('labels.tokenDecimal')" name="decimal">
       <a-input-number
         v-model:value="form.decimal"
+        :disabled="issueSudt && infoExist"
         :min="0"
         :max="38"
         placeholder="0 ~ 38"
@@ -33,7 +36,7 @@
     >
       <a-input-number
         v-model:value="form.count"
-        :min="1"
+        :min="0"
         style="width: 150px"
       />
     </a-form-item>
@@ -65,7 +68,8 @@ import {
   SUDT_SMALLEST_CAPACITY,
   SUDT_TYPE_SCRIPT,
   toUint128Le,
-  showTransactionModal
+  showTransactionModal,
+  parseSudtInfoData
 } from '@/utils'
 import { UnderscoreCell } from '../interface/index'
 import { defineComponent } from 'vue'
@@ -73,6 +77,8 @@ import { defineComponent } from 'vue'
 const Component = defineComponent({
   data: function () {
     return {
+      infoExist: false,
+      infoParseError: false,
       form: {
         name: '',
         symbol: '',
@@ -145,6 +151,30 @@ const Component = defineComponent({
     labelColumn: Number,
     wrapperColumn: Number
   },
+  async mounted() {
+    const sudtInfoTypeScript = {
+      code_hash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
+      hash_type: process.env
+        .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
+      args: scriptToHash(
+        camelCaseScriptKey(
+          JSON.parse(window.localStorage.getItem('lockScript') as string)
+        )
+      )
+    }
+    const sudtInfoCells = await getCells('type', sudtInfoTypeScript)
+    if (sudtInfoCells.length > 0) {
+      const data = parseSudtInfoData(sudtInfoCells[0].output_data)
+      if (data.name === "" || data.symbol === "" || data.decimal === -1) {
+        this.infoParseError = true
+        return
+      }
+      this.form.name = data.name
+      this.form.symbol = data.symbol
+      this.form.decimal = data.decimal
+      this.infoExist = true
+    }
+  },
   methods: {
     checkFormValidate: async function () {
       (this.$refs.ruleForm as HTMLFormElement).validate().then(() => {
@@ -163,9 +193,9 @@ const Component = defineComponent({
       const cell: UnderscoreCell = await getBiggestCapacityCell(
         JSON.parse(window.localStorage.getItem('lockScript') as string)
       )
-      let restCapacity =
-          BigInt(cell.output.capacity) - SUDT_INFO_SMALLEST_CAPACITY
-      if (this.issueSudt) {
+      let restCapacity = BigInt(cell.output.capacity)
+
+      if (this.issueSudt && this.form.count !== 0) {
         SUDT_TYPE_SCRIPT.args = window.localStorage.getItem('lockHash') || ''
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         rawTx.outputs.push({
@@ -185,8 +215,6 @@ const Component = defineComponent({
         rawTx.cellDeps.shift()
       }
 
-      rawTx.cellDeps.push(SUDT_INFO_CELL_DEP)
-
       rawTx.inputs.push({
         previousOutput: {
           txHash: cell.out_point.tx_hash,
@@ -196,45 +224,51 @@ const Component = defineComponent({
       })
       rawTx.witnesses.push('0x')
 
-      const sudtInfoTypeScript = {
-        codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
-        hashType: process.env
-          .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-        args: scriptToHash(
-          camelCaseScriptKey(
-            JSON.parse(window.localStorage.getItem('lockScript') as string)
+      if (!this.infoExist) {
+        rawTx.cellDeps.push(SUDT_INFO_CELL_DEP)
+
+        restCapacity = restCapacity - SUDT_INFO_SMALLEST_CAPACITY
+
+        const sudtInfoTypeScript = {
+          codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
+          hashType: process.env
+            .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
+          args: scriptToHash(
+            camelCaseScriptKey(
+              JSON.parse(window.localStorage.getItem('lockScript') as string)
+            )
           )
+        }
+        const sudtInfoCells = await getCells(
+          'type',
+          underscoreScriptKey(sudtInfoTypeScript)
         )
-      }
-      const sudtInfoCells = await getCells(
-        'type',
-        underscoreScriptKey(sudtInfoTypeScript)
-      )
-      if (sudtInfoCells.length > 0) {
-        rawTx.inputs.push({
-          previousOutput: {
-            txHash: sudtInfoCells[0].out_point.tx_hash,
-            index: sudtInfoCells[0].out_point.index
-          },
-          since: '0x0'
+        if (sudtInfoCells.length > 0) {
+          rawTx.inputs.push({
+            previousOutput: {
+              txHash: sudtInfoCells[0].out_point.tx_hash,
+              index: sudtInfoCells[0].out_point.index
+            },
+            since: '0x0'
+          })
+          rawTx.witnesses.push('0x')
+          restCapacity = restCapacity + BigInt(sudtInfoCells[0].output.capacity)
+        }
+
+        rawTx.outputs.push({
+          capacity: `0x${SUDT_INFO_SMALLEST_CAPACITY.toString(16)}`,
+          lock: camelCaseScriptKey(
+            JSON.parse(window.localStorage.getItem('lockScript') as string)
+          ),
+          type: sudtInfoTypeScript
         })
-        rawTx.witnesses.push('0x')
-        restCapacity = restCapacity + BigInt(sudtInfoCells[0].output.capacity)
-      }
 
-      rawTx.outputs.push({
-        capacity: `0x${SUDT_INFO_SMALLEST_CAPACITY.toString(16)}`,
-        lock: camelCaseScriptKey(
-          JSON.parse(window.localStorage.getItem('lockScript') as string)
-        ),
-        type: sudtInfoTypeScript
-      })
-
-      rawTx.outputsData.push(
+        rawTx.outputsData.push(
           `0x${this.form.decimal.toString(16).padStart(2, '0')}0a${stringToHex(
             this.form.name
           )}0a${stringToHex(this.form.symbol)}`
-      )
+        )
+      }
 
       rawTx.outputs.push({
         capacity: `0x${restCapacity.toString(16)}`,

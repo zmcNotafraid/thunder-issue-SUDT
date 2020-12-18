@@ -45,7 +45,7 @@ export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreSc
         script: script,
         script_type: scriptType
       },
-      'asc',
+      'desc',
       '0x3e8'
     ]
   }

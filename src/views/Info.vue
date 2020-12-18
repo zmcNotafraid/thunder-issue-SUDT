@@ -52,7 +52,7 @@ import {
   SUDT_TYPE_SCRIPT,
   camelCaseScriptKey
 } from '@/utils'
-import { UnderscoreScript, UnderscoreCell } from '../interface/index'
+import { UnderscoreScript } from '../interface/index'
 import SudtFormComponent from '../components/SudtForm.vue'
 
 export default defineComponent({
@@ -90,12 +90,7 @@ export default defineComponent({
     if (cells.length === 0) {
       return
     }
-    const newewstCell = cells.sort(
-      (cell1: UnderscoreCell, cell2: UnderscoreCell) => {
-        return Number(BigInt(cell2.block_number) - BigInt(cell1.block_number))
-      }
-    )[0]
-    const sudtInfo = parseSudtInfoData(newewstCell.output_data)
+    const sudtInfo = parseSudtInfoData(cells[0].output_data)
     this.name = sudtInfo.name
     this.symbol = sudtInfo.symbol
     this.decimal = sudtInfo.decimal

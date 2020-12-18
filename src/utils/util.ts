@@ -1,6 +1,7 @@
 import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey, getTransaction } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 import { Modal } from 'ant-design-vue'
+import { ModalFunc, ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
@@ -24,7 +25,7 @@ export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Prom
   return cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
 }
 
-export const showTransactionModal = async (tx: string): Promise<any> => {
+export const showTransactionModal = async (tx: string): Promise<void> => {
   const infoModal = Modal.info({
     title: 'Submitted',
     content: `Waitting for blockchain confirmation ${tx}`,
@@ -33,7 +34,7 @@ export const showTransactionModal = async (tx: string): Promise<any> => {
     okButtonProps: { disabled: true }
   })
 
-  const updateModal = async (modal: any, tx: string) => {
+  const updateModal = async (modal: { destroy: () => void; update?: (newConfig: ModalFuncProps) => void }, tx: string) => {
     const status = await getTransaction(tx)
     if (status === "committed") {
       modal.destroy()
