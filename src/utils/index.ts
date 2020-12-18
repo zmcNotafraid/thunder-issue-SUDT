@@ -1,4 +1,4 @@
 export * from './const'
 export * from './rpc'
 export * from './parser'
-export * from './cell'
+export * from './util'

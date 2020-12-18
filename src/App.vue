@@ -50,7 +50,6 @@
               {{ locale }}
               </a-space>
               <DownOutlined />
-
             </a>
             <template #overlay>
               <a-menu @click="switchLocale">

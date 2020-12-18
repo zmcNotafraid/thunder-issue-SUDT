@@ -1,5 +1,6 @@
-import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey } from "./index"
+import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey, getTransaction } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
+import { Modal } from 'ant-design-vue'
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
@@ -21,4 +22,31 @@ export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
 export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Promise<UnderscoreCell> => {
   const cells: Array<UnderscoreCell> = await getCells('lock', lockScript)
   return cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
+}
+
+export const showTransactionModal = async (tx: string): Promise<any> => {
+  const infoModal = Modal.info({
+    title: 'Submitted',
+    content: `Waitting for blockchain confirmation ${tx}`,
+    centered: true,
+    okText: "",
+    okButtonProps: { disabled: true }
+  })
+
+  const updateModal = async (modal: any, tx: string) => {
+    const status = await getTransaction(tx)
+    if (status === "committed") {
+      modal.destroy()
+      Modal.success({
+        title: 'Complete',
+        content: tx,
+        maskClosable: true,
+        centered: true,
+        okText: "关闭"
+      })
+    } else {
+      setTimeout(() => { updateModal(infoModal, tx) }, 5000)
+    }
+  }
+  setTimeout(() => { updateModal(infoModal, tx) }, 5000)
 }

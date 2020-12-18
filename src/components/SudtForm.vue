@@ -7,24 +7,43 @@
     :wrapper-col="wrapperCol"
   >
     <a-form-item :label="$t('labels.tokenName')" name="name">
-      <a-input v-model:value="form.name" :placeholder="$t('placeholder.maxLength', { length: 32 })"/>
+      <a-input
+        v-model:value="form.name"
+        :placeholder="$t('placeholder.maxLength', { length: 32 })"
+      />
     </a-form-item>
     <a-form-item :label="$t('labels.tokenSymbol')" name="symbol">
-      <a-input v-model:value="form.symbol" :placeholder="$t('placeholder.maxLength', { length: 8 })" />
+      <a-input
+        v-model:value="form.symbol"
+        :placeholder="$t('placeholder.maxLength', { length: 8 })"
+      />
     </a-form-item>
     <a-form-item :label="$t('labels.tokenDecimal')" name="decimal">
       <a-input-number
         v-model:value="form.decimal"
-        :min=0
-        :max=38
+        :min="0"
+        :max="38"
         placeholder="0 ~ 38"
       />
     </a-form-item>
-    <a-form-item v-if="issueSudt === true" :label="$t('labels.tokenCount')" name="count">
-      <a-input-number v-model:value="form.count" :min=1 style="width: 150px" />
+    <a-form-item
+      v-if="issueSudt === true"
+      :label="$t('labels.tokenCount')"
+      name="count"
+    >
+      <a-input-number
+        v-model:value="form.count"
+        :min="1"
+        style="width: 150px"
+      />
     </a-form-item>
-    <a-form-item v-if="issueSudt === true" :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="checkFormValidate"> {{ $t('buttons.submit') }} </a-button>
+    <a-form-item
+      v-if="issueSudt === true"
+      :wrapper-col="{ span: 14, offset: 4 }"
+    >
+      <a-button type="primary" @click="checkFormValidate">
+        {{ $t('buttons.submit') }}
+      </a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -45,7 +64,8 @@ import {
   SUDT_INFO_SMALLEST_CAPACITY,
   SUDT_SMALLEST_CAPACITY,
   SUDT_TYPE_SCRIPT,
-  toUint128Le
+  toUint128Le,
+  showTransactionModal
 } from '@/utils'
 import { UnderscoreCell } from '../interface/index'
 import { defineComponent } from 'vue'
@@ -61,19 +81,59 @@ const Component = defineComponent({
       },
       rules: {
         count: [
-          { type: 'integer', required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenCount") }), trigger: 'blur' }
+          {
+            type: 'integer',
+            required: true,
+            message: this.$t('validations.required', {
+              field: this.$t('labels.tokenCount')
+            }),
+            trigger: 'blur'
+          }
         ],
         name: [
-          { required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenName") }), trigger: 'blur' },
-          { max: 32, message: this.$t("placeholder.maxLength", { length: 32 }), trigger: 'blur' }
+          {
+            required: true,
+            message: this.$t('validations.required', {
+              field: this.$t('labels.tokenName')
+            }),
+            trigger: 'blur'
+          },
+          {
+            max: 32,
+            message: this.$t('placeholder.maxLength', { length: 32 }),
+            trigger: 'blur'
+          }
         ],
         symbol: [
-          { required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenSymbol") }), trigger: 'blur' },
-          { max: 8, message: this.$t("placeholder.maxLength", { length: 8 }), trigger: 'blur' }
+          {
+            required: true,
+            message: this.$t('validations.required', {
+              field: this.$t('labels.tokenSymbol')
+            }),
+            trigger: 'blur'
+          },
+          {
+            max: 8,
+            message: this.$t('placeholder.maxLength', { length: 8 }),
+            trigger: 'blur'
+          }
         ],
         decimal: [
-          { type: 'integer', required: true, message: this.$t('validations.required', { field: this.$t("labels.tokenDecimal") }), trigger: 'blur' },
-          { type: 'integer', min: 0, max: 38, message: this.$t('validations.decimalLength'), trigger: 'blur' }
+          {
+            type: 'integer',
+            required: true,
+            message: this.$t('validations.required', {
+              field: this.$t('labels.tokenDecimal')
+            }),
+            trigger: 'blur'
+          },
+          {
+            type: 'integer',
+            min: 0,
+            max: 38,
+            message: this.$t('validations.decimalLength'),
+            trigger: 'blur'
+          }
         ]
       },
       labelCol: { span: this.labelColumn },
@@ -87,16 +147,14 @@ const Component = defineComponent({
   },
   methods: {
     checkFormValidate: async function () {
-      (this.$refs.ruleForm as HTMLFormElement)
-        .validate()
-        .then(() => {
-          this.submit()
-        })
+      (this.$refs.ruleForm as HTMLFormElement).validate().then(() => {
+        this.submit()
+      })
     },
-    submit: async function(): Promise<Record<string, unknown> | undefined> {
+    submit: async function (): Promise<Record<string, unknown> | undefined> {
       const authToken: string | null = window.localStorage.getItem('authToken')
       if (!authToken) {
-        message.error(this.$t("errors.noAuth"))
+        message.error(this.$t('errors.noAuth'))
         return
       }
 
@@ -105,9 +163,10 @@ const Component = defineComponent({
       const cell: UnderscoreCell = await getBiggestCapacityCell(
         JSON.parse(window.localStorage.getItem('lockScript') as string)
       )
-      let restCapacity = BigInt(cell.output.capacity) - SUDT_INFO_SMALLEST_CAPACITY
+      let restCapacity =
+          BigInt(cell.output.capacity) - SUDT_INFO_SMALLEST_CAPACITY
       if (this.issueSudt) {
-        SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
+        SUDT_TYPE_SCRIPT.args = window.localStorage.getItem('lockHash') || ''
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         rawTx.outputs.push({
           capacity: `0x${SUDT_SMALLEST_CAPACITY.toString(16)}`,
@@ -118,7 +177,9 @@ const Component = defineComponent({
         })
         rawTx.outputsData.push(
           '0x' +
-            toUint128Le(BigInt(this.form.count) * BigInt(10 ** this.form.decimal))
+              toUint128Le(
+                BigInt(this.form.count) * BigInt(10 ** this.form.decimal)
+              )
         )
       } else {
         rawTx.cellDeps.shift()
@@ -187,7 +248,10 @@ const Component = defineComponent({
       const minerFee = BigInt(getTransactionSize(rawTx)) * FEE_RATIO
       const outputsLength = rawTx.outputs.length
       rawTx.outputs[outputsLength - 1].capacity =
-          '0x' + (BigInt(rawTx.outputs[outputsLength - 1].capacity) - minerFee).toString(16)
+          '0x' +
+          (BigInt(rawTx.outputs[outputsLength - 1].capacity) - minerFee).toString(
+            16
+          )
 
       try {
         const response = await signAndSendTransaction(
@@ -195,7 +259,7 @@ const Component = defineComponent({
           authToken,
             window.localStorage.getItem('lockHash') as string
         )
-        message.success(`TX: ${response.txHash}`, 10)
+        showTransactionModal(response.txHash as "string")
       } catch (error) {
         message.error(error.message)
       }

@@ -61,6 +61,31 @@ export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreSc
   return data.result.objects
 }
 
+export const getTransaction = async (tx: string): Promise<string | undefined> => {
+  if (tx === "") {
+    return
+  }
+  const payload = {
+    id: 42,
+    jsonrpc: '2.0',
+    method: 'get_transaction',
+    params: [
+      tx
+    ]
+  }
+  const body = JSON.stringify(payload, null, '  ')
+  const response = await fetch(process.env.VUE_APP_RICH_NODE_RPC_URL || '', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body
+  })
+  const data = await response.json()
+  console.info(data.result)
+  return data.result.tx_status.status
+}
+
 export const signAndSendTransaction = async (rawTransaction: CKBComponents.RawTransactionToSign, token: string, lockHash: string, inputSignConfig = { index: 0, length: -1 }): Promise<Record<string, unknown>> => {
   rawTransaction.witnesses[0] = {
     lock: '',

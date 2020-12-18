@@ -40,7 +40,8 @@ import {
   getCells,
   underscoreScriptKey,
   ACP_CELL_DEP,
-  PW_CELL_DEP
+  PW_CELL_DEP,
+  showTransactionModal
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -191,8 +192,7 @@ export default defineComponent({
           window.localStorage.getItem("lockHash") as string,
           inputSignConfig
         )
-        message.success(`TX: ${response.txHash}`, 10)
-        setTimeout(this.$router.go, 5000)
+        showTransactionModal(response.txHash as string)
       } catch (error) {
         message.error(error.message)
       }

@@ -28,7 +28,8 @@ import {
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
-  parseBigIntStringNumber
+  parseBigIntStringNumber,
+  showTransactionModal
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -114,8 +115,7 @@ export default defineComponent({
           authToken,
           window.localStorage.getItem("lockHash") as string
         )
-        message.success(`TX: ${response.txHash}`, 10)
-        setTimeout(this.$router.go, 5000)
+        showTransactionModal(response.txHash as string)
       } catch (error) {
         message.error(error.message)
       }

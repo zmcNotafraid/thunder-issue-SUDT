@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import { setI18nLanguage, loadLocaleMessages } from '../i18n'
 import type { I18n, Locale } from 'vue-i18n'
+import { Modal } from 'ant-design-vue'
 import Auth from '../views/Auth.vue'
 import Burn from '../views/Burn.vue'
 import Info from '../views/Info.vue'
@@ -39,6 +40,7 @@ export function setupRouter(i18n: I18n): Router {
   })
 
   router.beforeEach((to, from, next) => {
+    Modal.destroyAll()
     const locale = localStorage.getItem("locale") || "en-US" as Locale
 
     // check locale
