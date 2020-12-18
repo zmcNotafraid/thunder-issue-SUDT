@@ -120,7 +120,6 @@ export default defineComponent({
         const cells = await getCells('lock', lockScript)
         if (cells.length === 0) {
           this.loading = false
-          message.error(this.$t("erros.noCells"))
           return
         }
 
