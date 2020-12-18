@@ -35,7 +35,7 @@ export default {
     noAddress: "找不到你的地址。请检查后重新认证",
     no256k1Address: "不存在 Secp256k1 地址",
     noCells: "没有可用的 Cell!",
-    keypering: "请确保 Keypering 正在运行，或者可以在此下载: https://github.com/nervosnetwork/keypering/releases",
+    keypering: "请确保 Keypering 正在运行，或者可以在此下载: ",
     provideCkbNeeded: "如果你不提供 Cell 必要的 CKB, 你就不能进行代币转账",
     noAcpCell: "接收者没有可用的代币 ACP Cell, 请联系他创建一个."
   },

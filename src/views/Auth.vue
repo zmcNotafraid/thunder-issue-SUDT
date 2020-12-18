@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, h, VNode } from "vue"
 import { message } from 'ant-design-vue'
 import {
   getCells,
@@ -130,7 +130,20 @@ export default defineComponent({
       } catch (error) {
         this.loading = false
         if (error.message === "Failed to fetch") {
-          message.error(this.$t("errors.keypering"))
+          const vnode: VNode =
+            h(
+              'span',
+              [
+                this.$t("errors.keypering"),
+                h('a', {
+                  href: 'https://github.com/nervosnetwork/keypering/releases',
+                  target: "_blank"
+                },
+                'https://github.com/nervosnetwork/keypering/releases'
+                )
+              ]
+            )
+          message.error(vnode)
         } else {
           message.error(error.message)
         }
@@ -144,7 +157,7 @@ export default defineComponent({
         await this.reload()
       } catch (error) {
         if (error.message === "Failed to fetch") {
-          message.error(this.$t("errors.keypering"))
+
         } else {
           message.error(error.message)
         }
