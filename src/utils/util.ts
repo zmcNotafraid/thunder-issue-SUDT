@@ -2,6 +2,7 @@ import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetwor
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 import { Modal } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
+import { h, VNode } from "vue"
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
@@ -27,9 +28,23 @@ export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Prom
 }
 
 export const showTransactionModal = async (tx: string): Promise<void> => {
+  const vnode: VNode =
+    h(
+      'div',
+      [
+        `Waitting for blockchain confirmation `,
+        h('a', {
+          href: getNetworkConst("EXPLORER_URL") + tx,
+          target: "_blank"
+        },
+        tx
+        )
+      ]
+    )
+
   const infoModal = Modal.info({
     title: 'Submitted',
-    content: `Waitting for blockchain confirmation ${tx}`,
+    content: vnode,
     centered: true,
     okText: "",
     okButtonProps: { disabled: true }

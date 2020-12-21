@@ -6,6 +6,7 @@ export const SUDT_INFO_SMALLEST_CAPACITY = BigInt(169 * 10 ** 8)
 export const TESTNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDep | CKBComponents.Script } = {
   RICH_NODE_INDEXER_URL: 'https://testnet.ckbapp.dev/indexer',
   RICH_NODE_RPC_URL: 'https://testnet.ckbapp.dev/rpc',
+  EXPLORER_URL: "https://explorer.nervos.org/aggron/transaction/",
 
   SUDT_TYPE_SCRIPT: {
     codeHash: "0xc5e5dcf215925f7ef4dfaf5f4b4f105bc321c02776d6e7d52a1db3fcd9d011a4",
@@ -54,6 +55,7 @@ export const TESTNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDe
 export const MAINNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDep | CKBComponents.Script } = {
   RICH_NODE_INDEXER_URL: 'https://mainnet.ckbapp.dev/indexer',
   RICH_NODE_RPC_URL: 'https://mainnet.ckbapp.dev/rpc',
+  EXPLORER_URL: "https://explorer.nervos.org/transaction/",
 
   SUDT_TYPE_SCRIPT: {
     codeHash: "0x5e7a36a77e68eecc013dfa2fe6a23f3b6c344b04005808694ae6dd45eea4cfd5",
