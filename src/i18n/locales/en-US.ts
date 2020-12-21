@@ -4,6 +4,7 @@ export default {
     connectedTestnet: 'Connected(Testnet)',
     connectedMainnet: 'Connected(Mainnet)',
     submit: 'Submit',
+    cancel: "Cancel",
     updateTokenInfo: "Update Token Info",
     submitExplorer: "Submit to ckb Explorer"
   },
@@ -25,7 +26,8 @@ export default {
   title: {
     walletInfo: "Wallet Info",
     tokenInfo: "Token Info",
-    root: "Thunder Issue SUDT"
+    root: "Thunder Issue SUDT",
+    updateSudtInfo: "Update SUDT Info"
   },
   placeholder: {
     maxLength: "Max length is {length}"

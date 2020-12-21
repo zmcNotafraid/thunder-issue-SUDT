@@ -65,10 +65,9 @@ export default defineComponent({
       if (this.address === "") {
         this.connectButton = this.$t('buttons.connect')
       } else {
-        if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("mainet")) {
+        if (window.localStorage.getItem("networkId") === "ckb") {
           this.connectButton = this.$t("buttons.connectedMainnet")
-        }
-        if (process.env.VUE_APP_RICH_NODE_INDEXER_URL?.includes("testnet")) {
+        } else {
           this.connectButton = this.$t('buttons.connectedTestnet')
         }
       }
@@ -152,8 +151,9 @@ export default defineComponent({
     },
     getAuth: async function (): Promise<void> {
       try {
-        const token = await requestAuth("Simplest DApp")
-        window.localStorage.setItem("authToken", token)
+        const response = await requestAuth("Simplest DApp")
+        window.localStorage.setItem("authToken", response.token)
+        window.localStorage.setItem("networkId", response.networkId)
         await this.reload()
       } catch (error) {
         if (error.message === "Failed to fetch") {

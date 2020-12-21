@@ -1,9 +1,9 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { KEYPERING_URL } from '../utils'
+import { KEYPERING_URL, getNetworkConst } from '../utils'
 import { UnderscoreScript, AccountList, UnderscoreCell } from '../interface'
 import { message } from 'ant-design-vue'
 
-export const requestAuth = async (description: string): Promise<string> => {
+export const requestAuth = async (description: string): Promise<{token: string, networkId: string}> => {
   const response = await fetch(KEYPERING_URL, {
     method: 'POST',
     body: JSON.stringify({
@@ -16,7 +16,7 @@ export const requestAuth = async (description: string): Promise<string> => {
     })
   })
   const data = await response.json()
-  return data.result.token
+  return data.result
 }
 
 export const queryAddresses = async (token: string): Promise<AccountList> => {
@@ -50,7 +50,7 @@ export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreSc
     ]
   }
   const body = JSON.stringify(payload, null, '  ')
-  const response = await fetch(process.env.VUE_APP_RICH_NODE_INDEXER_URL || '', {
+  const response = await fetch(getNetworkConst("RICH_NODE_INDEXER_URL") as string, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -61,9 +61,9 @@ export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreSc
   return data.result.objects
 }
 
-export const getTransaction = async (tx: string): Promise<string | undefined> => {
+export const getTransaction = async (tx: string): Promise<Record<string, Record<string, unknown>> | undefined> => {
   if (tx === "") {
-    return
+    return undefined
   }
   const payload = {
     id: 42,
@@ -74,7 +74,8 @@ export const getTransaction = async (tx: string): Promise<string | undefined> =>
     ]
   }
   const body = JSON.stringify(payload, null, '  ')
-  const response = await fetch(process.env.VUE_APP_RICH_NODE_RPC_URL || '', {
+  const indexerUrl = getNetworkConst("RICH_NODE_RPC_URL") as string
+  const response = await fetch(indexerUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -82,8 +83,7 @@ export const getTransaction = async (tx: string): Promise<string | undefined> =>
     body
   })
   const data = await response.json()
-  console.info(data.result)
-  return data.result.tx_status.status
+  return data.result
 }
 
 export const signAndSendTransaction = async (rawTransaction: CKBComponents.RawTransactionToSign, token: string, lockHash: string, inputSignConfig = { index: 0, length: -1 }): Promise<Record<string, unknown>> => {

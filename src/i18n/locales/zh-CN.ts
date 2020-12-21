@@ -4,6 +4,7 @@ export default {
     connectedTestnet: '已连接(测试网)',
     connectedMainnet: '已连接(主网)',
     submit: '提交',
+    cancel: "取消",
     updateTokenInfo: "更新代币信息",
     submitExplorer: "提交代币信息"
   },
@@ -25,7 +26,8 @@ export default {
   title: {
     walletInfo: "钱包信息",
     tokenInfo: "代币信息",
-    root: "一键发币"
+    root: "一键发币",
+    updateSudtInfo: "更新代币信息"
   },
   placeholder: {
     maxLength: "最大支持 {length} 位"

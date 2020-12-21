@@ -24,12 +24,11 @@ import {
   toUint128Le,
   combineInputCells,
   FEE_RATIO,
-  SUDT_TYPE_SCRIPT,
-  SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
   parseBigIntStringNumber,
-  showTransactionModal
+  showTransactionModal,
+  getNetworkConst
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -91,16 +90,17 @@ export default defineComponent({
       const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
       const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
       const restSudtCount = originalSudtCount - (BigInt(this.form.burnCount * 10 ** decimal))
-      SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
+      const sudtTypeScript = getNetworkConst("SUDT_TYPE_SCRIPT") as CKBComponents.Script
+      sudtTypeScript.args = window.localStorage.getItem('lockHash') || ''
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
-        type: SUDT_TYPE_SCRIPT
+        type: sudtTypeScript
       })
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 
       rawTx.outputs.push({
-        capacity: `0x${(BigInt(this.biggestCapacityCell.output.capacity) - SUDT_SMALLEST_CAPACITY).toString(16)}`,
+        capacity: this.biggestCapacityCell.output.capacity,
         lock: camelCaseScriptKey(fromLockScript),
         type: null
       })

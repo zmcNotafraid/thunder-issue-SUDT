@@ -1,5 +1,5 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { SUDT_CELL_DEP } from './index'
+import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO } from './index'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
 
 export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
@@ -31,7 +31,7 @@ export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {
   return {
     version: '0x0',
     cellDeps: [
-      SUDT_CELL_DEP
+      getNetworkConst("SUDT_CELL_DEP") as CKBComponents.CellDep
     ],
     headerDeps: [],
     inputs: [],
@@ -110,4 +110,8 @@ export const calSudtAmount = function(cells: Array<UnderscoreCell>): bigint {
     .map(cell => BigInt('0x' + readBigUInt128LE(cell.output_data.slice(2, 34))))
     .reduce((acc, curr) => acc + curr, BigInt(0))
   return amount
+}
+
+export const getNetworkConst = (key: string): string | CKBComponents.CellDep | CKBComponents.Script => {
+  return window.localStorage.getItem("networkId") === 'ckb' ? MAINNET_SCRIPT_INFO[key] : TESTNET_SCRIPT_INFO[key]
 }

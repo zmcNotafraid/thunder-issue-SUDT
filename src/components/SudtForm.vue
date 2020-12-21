@@ -53,7 +53,7 @@
 <script lang="ts">
 import { message } from 'ant-design-vue'
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { getTransactionSize, scriptToHash } from '@nervosnetwork/ckb-sdk-utils'
+import { getTransactionSize } from '@nervosnetwork/ckb-sdk-utils'
 import {
   getCells,
   underscoreScriptKey,
@@ -63,13 +63,12 @@ import {
   stringToHex,
   FEE_RATIO,
   signAndSendTransaction,
-  SUDT_INFO_CELL_DEP,
   SUDT_INFO_SMALLEST_CAPACITY,
   SUDT_SMALLEST_CAPACITY,
-  SUDT_TYPE_SCRIPT,
   toUint128Le,
   showTransactionModal,
-  parseSudtInfoData
+  parseSudtInfoData,
+  getNetworkConst
 } from '@/utils'
 import { UnderscoreCell } from '../interface/index'
 import { defineComponent } from 'vue'
@@ -152,17 +151,10 @@ const Component = defineComponent({
     wrapperColumn: Number
   },
   async mounted() {
-    const sudtInfoTypeScript = {
-      code_hash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
-      hash_type: process.env
-        .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-      args: scriptToHash(
-        camelCaseScriptKey(
-          JSON.parse(window.localStorage.getItem('lockScript') as string)
-        )
-      )
-    }
-    const sudtInfoCells = await getCells('type', sudtInfoTypeScript)
+    const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
+    sudtInfoTypeScript.args = window.localStorage.getItem("lockHash") || ""
+
+    const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
     if (sudtInfoCells.length > 0) {
       const data = parseSudtInfoData(sudtInfoCells[0].output_data)
       if (data.name === "" || data.symbol === "" || data.decimal === -1) {
@@ -196,14 +188,15 @@ const Component = defineComponent({
       let restCapacity = BigInt(cell.output.capacity)
 
       if (this.issueSudt && this.form.count !== 0) {
-        SUDT_TYPE_SCRIPT.args = window.localStorage.getItem('lockHash') || ''
+        const sudtTypeScript = getNetworkConst("SUDT_TYPE_SCRIPT") as CKBComponents.Script
+        sudtTypeScript.args = window.localStorage.getItem('lockHash') || ''
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         rawTx.outputs.push({
           capacity: `0x${SUDT_SMALLEST_CAPACITY.toString(16)}`,
           lock: camelCaseScriptKey(
             JSON.parse(window.localStorage.getItem('lockScript') as string)
           ),
-          type: SUDT_TYPE_SCRIPT
+          type: sudtTypeScript
         })
         rawTx.outputsData.push(
           '0x' +
@@ -225,20 +218,13 @@ const Component = defineComponent({
       rawTx.witnesses.push('0x')
 
       if (!this.infoExist) {
-        rawTx.cellDeps.push(SUDT_INFO_CELL_DEP)
+        rawTx.cellDeps.push(getNetworkConst("SUDT_INFO_CELL_DEP") as CKBComponents.CellDep)
 
         restCapacity = restCapacity - SUDT_INFO_SMALLEST_CAPACITY
 
-        const sudtInfoTypeScript = {
-          codeHash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
-          hashType: process.env
-            .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-          args: scriptToHash(
-            camelCaseScriptKey(
-              JSON.parse(window.localStorage.getItem('lockScript') as string)
-            )
-          )
-        }
+        const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
+        sudtInfoTypeScript.args = window.localStorage.getItem('lockHash') || ''
+
         const sudtInfoCells = await getCells(
           'type',
           underscoreScriptKey(sudtInfoTypeScript)

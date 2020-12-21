@@ -32,16 +32,14 @@ import {
   toUint128Le,
   combineInputCells,
   FEE_RATIO,
-  SUDT_TYPE_SCRIPT,
   SUDT_SMALLEST_CAPACITY,
   calSudtAmount,
   calCapacityAmount,
   parseBigIntStringNumber,
   getCells,
   underscoreScriptKey,
-  ACP_CELL_DEP,
-  PW_CELL_DEP,
-  showTransactionModal
+  showTransactionModal,
+  getNetworkConst
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -106,10 +104,11 @@ export default defineComponent({
 
       const receiverLockScript = addressToScript(this.form.toAddress)
       const receiverLockCells = await getCells('lock', underscoreScriptKey(receiverLockScript))
-      SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
-      const receiverSudtAcpLiveCells = receiverLockCells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
+      const sudtTypeScript = getNetworkConst("SUDT_TYPE_SCRIPT") as CKBComponents.Script
+      sudtTypeScript.args = window.localStorage.getItem('lockHash') || ''
+      const receiverSudtAcpLiveCells = receiverLockCells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
       if (!this.form.selfProvide) {
-        if (![process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
+        if (![getNetworkConst("ACP_CODE_HASH"), getNetworkConst("PW_CODE_HASH")].includes(receiverLockScript.codeHash)) {
           message.error(this.$t("errors.provideCkbNeeded"))
           return
         }
@@ -120,9 +119,9 @@ export default defineComponent({
         }
       }
 
-      if ([process.env.VUE_APP_ACP_CODE_HASH, process.env.VUE_APP_PW_CODE_HASH].includes(receiverLockScript.codeHash)) {
-        const cellDep = receiverLockScript.codeHash === process.env.VUE_APP_ACP_CODE_HASH ? ACP_CELL_DEP : PW_CELL_DEP
-        rawTx.cellDeps.push(cellDep)
+      if ([getNetworkConst("ACP_CODE_HASH"), getNetworkConst("PW_CODE_HASH")].includes(receiverLockScript.codeHash)) {
+        const cellDep = receiverLockScript.codeHash === getNetworkConst("ACP_CODE_HASH") ? getNetworkConst("ACP_CELL_DEP") : getNetworkConst("PW_CELL_DEP")
+        rawTx.cellDeps.push(cellDep as CKBComponents.CellDep)
 
         if (receiverSudtAcpLiveCells.length > 0) {
           inputSignConfig = {
@@ -141,7 +140,7 @@ export default defineComponent({
           rawTx.outputs.push({
             capacity: receiverSudtAcpLiveCells[0].output.capacity,
             lock: receiverLockScript,
-            type: SUDT_TYPE_SCRIPT
+            type: sudtTypeScript
           })
           const originalToSudtCount = readBigUInt128LE(receiverSudtAcpLiveCells[0].output_data.slice(2))
           rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
@@ -149,7 +148,7 @@ export default defineComponent({
           rawTx.outputs.push({
             capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
             lock: receiverLockScript,
-            type: SUDT_TYPE_SCRIPT
+            type: sudtTypeScript
           })
           rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
           restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
@@ -158,7 +157,7 @@ export default defineComponent({
         rawTx.outputs.push({
           capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
           lock: receiverLockScript,
-          type: SUDT_TYPE_SCRIPT
+          type: sudtTypeScript
         })
         rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
@@ -171,7 +170,7 @@ export default defineComponent({
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
-        type: SUDT_TYPE_SCRIPT
+        type: sudtTypeScript
       })
       rawTx.outputsData.push('0x' + toUint128Le(restSudtCount))
 

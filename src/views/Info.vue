@@ -11,16 +11,16 @@
       </a-col>
     </a-row>
     <a-modal
-      title="Update SUDT Info"
+      :title="$t('title.updateSudtInfo')"
       :visible="visible"
       @cancel="handleCancel"
       :confirm-loading="confirmLoading"
     >
       <component-sudt-form ref="sudtInfoForm" :issue-sudt=false></component-sudt-form>
       <template v-slot:footer>
-        <a-button key="back" @click="handleCancel"> Cancel </a-button>
+        <a-button key="back" @click="handleCancel"> {{ $t('buttons.cancel') }} </a-button>
         <a-button key="submit" type="primary" @click="handleSubmit">
-          {{ $t("buttons.submit") }}Submit
+          {{ $t("buttons.submit") }}
         </a-button>
       </template>
     </a-modal>
@@ -45,14 +45,12 @@
 import { defineComponent } from 'vue'
 import { message } from 'ant-design-vue'
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { scriptToHash } from '@nervosnetwork/ckb-sdk-utils'
 import {
   getCells,
   parseSudtInfoData,
-  SUDT_TYPE_SCRIPT,
-  camelCaseScriptKey
+  getNetworkConst,
+  underscoreScriptKey
 } from '@/utils'
-import { UnderscoreScript } from '../interface/index'
 import SudtFormComponent from '../components/SudtForm.vue'
 
 export default defineComponent({
@@ -76,17 +74,10 @@ export default defineComponent({
       return
     }
 
-    const sudtInfoTypeScript: UnderscoreScript = {
-      code_hash: process.env.VUE_APP_SUDT_INFO_CODE_HASH || '',
-      hash_type: process.env
-        .VUE_APP_SUDT_INFO_HASH_TYPE as CKBComponents.ScriptHashType,
-      args: scriptToHash(
-        camelCaseScriptKey(
-          JSON.parse(window.localStorage.getItem('lockScript') as string)
-        )
-      )
-    }
-    const cells = await getCells('type', sudtInfoTypeScript)
+    const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
+    sudtInfoTypeScript.args = window.localStorage.getItem('lockHash') || ""
+
+    const cells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
     if (cells.length === 0) {
       return
     }
@@ -114,13 +105,14 @@ export default defineComponent({
       return (this.$refs.sudtInfoForm as HTMLFormElement).checkFormValidate()
     },
     submitInfo() {
-      SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
+      const sudtTypeScript = getNetworkConst("SUDT_TYPE_SCRIPT") as CKBComponents.Script
+      const sudtTypeArgs = window.localStorage.getItem("lockHash") || ""
       const TOKEN_EMAIL_BODY = `
                         Title: Submit Token Information%0a%0d
                         Type Script:%0a%0d
-                            Code Hash: ${SUDT_TYPE_SCRIPT.codeHash}%0a%0d
-                            Hash Type: ${SUDT_TYPE_SCRIPT.hashType}%0a%0d
-                            Args: ${SUDT_TYPE_SCRIPT.args}%0a%0d
+                            Code Hash: ${sudtTypeScript.codeHash}%0a%0d
+                            Hash Type: ${sudtTypeScript.hashType}%0a%0d
+                            Args: ${sudtTypeArgs}%0a%0d
                         Information:%0a%0d
                           Full Name: ${this.name}%0a%0d
                           Symbol: ${this.symbol}%0a%0d

@@ -1,4 +1,4 @@
-import { getCells, compareScript, SUDT_TYPE_SCRIPT, underscoreScriptKey, getTransaction } from "./index"
+import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 import { Modal } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
@@ -11,8 +11,9 @@ export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   }
   const biggestCapacityCell = cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
 
-  SUDT_TYPE_SCRIPT.args = window.localStorage.getItem("lockHash") || ""
-  const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(SUDT_TYPE_SCRIPT)) })
+  const sudtTypeScript = getNetworkConst("SUDT_TYPE_SCRIPT") as CKBComponents.Script
+  sudtTypeScript.args = window.localStorage.getItem('lockHash') || ''
+  const sudtCells = cells.filter((cell: UnderscoreCell) => { return compareScript(cell.output.type, underscoreScriptKey(sudtTypeScript)) })
   if (sudtCells.length > 0) {
     return [biggestCapacityCell].concat(sudtCells)
   } else {
@@ -35,8 +36,8 @@ export const showTransactionModal = async (tx: string): Promise<void> => {
   })
 
   const updateModal = async (modal: { destroy: () => void; update?: (newConfig: ModalFuncProps) => void }, tx: string) => {
-    const status = await getTransaction(tx)
-    if (status === "committed") {
+    const response = await getTransaction(tx)
+    if (response !== undefined && response?.tx_status?.status === "committed") {
       modal.destroy()
       Modal.success({
         title: 'Complete',
