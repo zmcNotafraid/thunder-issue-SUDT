@@ -25,6 +25,7 @@ import {
 const app = createApp(App)
 const i18n = setupI18n({
   globalInjection: true,
+  silentFallbackWarn: true,
   legacy: false,
   messages: {
     en
