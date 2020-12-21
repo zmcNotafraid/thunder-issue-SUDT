@@ -1,5 +1,5 @@
 <template>
-  <component-sudt-form :issue-sudt=true label-column=4 wrapper-column=10></component-sudt-form>
+  <component-sudt-form :issue-sudt=true :label-column=4 :wrapper-column=10></component-sudt-form>
 </template>
 
 <script lang='ts'>
