@@ -15,14 +15,16 @@
       :visible="visible"
       @cancel="handleCancel"
       :confirm-loading="confirmLoading"
+      :footer=true
     >
-      <component-sudt-form ref="sudtInfoForm" :issue-sudt=false></component-sudt-form>
-      <template v-slot:footer>
-        <a-button key="back" @click="handleCancel"> {{ $t('buttons.cancel') }} </a-button>
-        <a-button key="submit" type="primary" @click="handleSubmit">
-          {{ $t("buttons.submit") }}
-        </a-button>
-      </template>
+      <component-sudt-form ref="sudtInfoForm" :issue-sudt=false :label-column=6 :wrapper-column=10></component-sudt-form>
+      <a-row>
+        <a-col :span='4' :offset="6">
+          <a-button key="submit" type="primary" @click="handleSubmit">
+            {{ $t("buttons.submit") }}
+          </a-button>
+        </a-col>
+      </a-row>
     </a-modal>
   </div>
   <br />

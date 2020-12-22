@@ -217,7 +217,7 @@ const Component = defineComponent({
       })
       rawTx.witnesses.push('0x')
 
-      if (!this.infoExist) {
+      if ((!this.infoExist && this.issueSudt) || !this.issueSudt) {
         rawTx.cellDeps.push(getNetworkConst("SUDT_INFO_CELL_DEP") as CKBComponents.CellDep)
 
         restCapacity = restCapacity - SUDT_INFO_SMALLEST_CAPACITY
