@@ -157,7 +157,20 @@ export default defineComponent({
         await this.reload()
       } catch (error) {
         if (error.message === "Failed to fetch") {
-
+          const vnode: VNode =
+            h(
+              'span',
+              [
+                this.$t("errors.keypering"),
+                h('a', {
+                  href: 'https://github.com/nervosnetwork/keypering/releases',
+                  target: "_blank"
+                },
+                'https://github.com/nervosnetwork/keypering/releases'
+                )
+              ]
+            )
+          message.error(vnode)
         } else {
           message.error(error.message)
         }
