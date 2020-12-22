@@ -7,12 +7,14 @@
       <a-input v-model:value="form.transferCount" type="number"/>
       <span>{{ $t('labels.availableSudt') }}: {{ currentSudtCount }}</span>
     </a-form-item>
-    <a-form-item :label="$t('labels.provideCKB')">
-      <a-checkbox v-model:checked="form.selfProvide"  />
+    <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
+      <a-checkbox v-model:checked="form.selfProvide">
+        {{ $t("labels.provideCKB") }}
+      </a-checkbox>
     </a-form-item>
-    <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+    <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
       <a-button type="primary" @click="onSubmit">
-        Submit
+        {{ $t("buttons.submit") }}
       </a-button>
     </a-form-item>
   </a-form>

@@ -38,7 +38,7 @@ export default {
     no256k1Address: "不存在 Secp256k1 地址",
     noCells: "没有可用的 Cell!",
     keypering: "请确保 Keypering 正在运行，或者可以在此下载: ",
-    provideCkbNeeded: "如果你不提供 Cell 必要的 CKB, 你就不能进行代币转账",
+    provideCkbNeeded: "你需要提供 Cell 必须的 CKB 才能进行转账",
     noAcpCell: "接收者没有可用的代币 ACP Cell, 请联系他创建一个."
   },
   success: {
