@@ -27,7 +27,7 @@ export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Prom
   return cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
 }
 
-export const showTransactionModal = async (tx: string): Promise<void> => {
+export const showTransactionModal = async (tx: string, callback: () => void): Promise<void> => {
   const vnode: VNode =
     h(
       'div',
@@ -61,6 +61,7 @@ export const showTransactionModal = async (tx: string): Promise<void> => {
         centered: true,
         okText: "关闭"
       })
+      callback()
     } else {
       setTimeout(() => { updateModal(infoModal, tx) }, 5000)
     }

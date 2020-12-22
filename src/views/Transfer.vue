@@ -193,7 +193,7 @@ export default defineComponent({
           window.localStorage.getItem("lockHash") as string,
           inputSignConfig
         )
-        showTransactionModal(response.txHash as string)
+        showTransactionModal(response.txHash as string, () => { setTimeout(this.$router.go, 1000) })
       } catch (error) {
         message.error(error.message)
       }
