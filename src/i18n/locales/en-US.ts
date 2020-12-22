@@ -54,5 +54,11 @@ export default {
     transfer: "Transfer Token",
     burn: "Burn Token",
     info: "Token Info"
+  },
+  modal: {
+    blockchainConfirmation: "Waitting for blockchain confirmation ",
+    close: "Close",
+    pending: "Pending",
+    complete: "Complete"
   }
 }

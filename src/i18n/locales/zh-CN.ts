@@ -54,5 +54,11 @@ export default {
     transfer: "代币转账",
     burn: "代币销毁",
     info: "代币信息"
+  },
+  modal: {
+    blockchainConfirmation: "等待链上确认 ",
+    close: "关闭",
+    pending: "发送中",
+    complete: "已确认"
   }
 }

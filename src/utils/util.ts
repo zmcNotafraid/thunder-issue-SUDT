@@ -1,8 +1,8 @@
 import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
-import { Modal } from 'ant-design-vue'
+import { Modal, Spin } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
-import { h, VNode } from "vue"
+import { h, VNode, ComponentPublicInstance } from "vue"
 
 export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
@@ -27,12 +27,12 @@ export const getBiggestCapacityCell = async (lockScript: UnderscoreScript): Prom
   return cells.filter((cell: UnderscoreCell) => cell.output.type === null).sort((cell1: UnderscoreCell, cell2: UnderscoreCell) => Number(BigInt(cell2.output.capacity) - BigInt(cell1.output.capacity)))[0]
 }
 
-export const showTransactionModal = async (tx: string, callback: () => void): Promise<void> => {
-  const vnode: VNode =
+export const showTransactionModal = async (tx: string, componentInstance: ComponentPublicInstance): Promise<void> => {
+  const pendingVnode: VNode =
     h(
       'div',
       [
-        `Waitting for blockchain confirmation `,
+        componentInstance.$t('modal.blockchainConfirmation'),
         h('a', {
           href: getNetworkConst("EXPLORER_URL") + tx,
           target: "_blank"
@@ -41,12 +41,11 @@ export const showTransactionModal = async (tx: string, callback: () => void): Pr
         )
       ]
     )
-
   const infoModal = Modal.info({
-    title: 'Submitted',
-    content: vnode,
+    title: h('span', [componentInstance.$t('modal.pending'), h(Spin)]),
+    content: pendingVnode,
     centered: true,
-    okText: "",
+    okText: componentInstance.$t('modal.close'),
     okButtonProps: { disabled: true }
   })
 
@@ -54,14 +53,28 @@ export const showTransactionModal = async (tx: string, callback: () => void): Pr
     const response = await getTransaction(tx)
     if (response !== undefined && response?.tx_status?.status === "committed") {
       modal.destroy()
+      const completeVnode: VNode =
+        h(
+          'div',
+          [
+            "",
+            h('a', {
+              href: getNetworkConst("EXPLORER_URL") + tx,
+              target: "_blank"
+            },
+            tx
+            )
+          ]
+        )
+
       Modal.success({
-        title: 'Complete',
-        content: tx,
+        title: componentInstance.$t('modal.complete'),
+        content: completeVnode,
         maskClosable: true,
         centered: true,
-        okText: "关闭"
+        onOk: () => { setTimeout(componentInstance.$router.go, 1000) },
+        okText: componentInstance.$t('modal.close')
       })
-      callback()
     } else {
       setTimeout(() => { updateModal(infoModal, tx) }, 5000)
     }

@@ -115,7 +115,7 @@ export default defineComponent({
           authToken,
           window.localStorage.getItem("lockHash") as string
         )
-        showTransactionModal(response.txHash as string, () => { setTimeout(this.$router.go, 1000) })
+        showTransactionModal(response.txHash as string, this)
       } catch (error) {
         message.error(error.message)
       }
