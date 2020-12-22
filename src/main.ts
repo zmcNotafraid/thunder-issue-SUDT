@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { setupRouter } from './router'
 import { setupI18n } from './i18n'
-import en from './i18n/locales/en-US'
+import en from './i18n/locales/en'
+import zh from './i18n/locales/zh'
 import 'moment'
 import {
   Layout,
@@ -25,10 +26,12 @@ import {
 const app = createApp(App)
 const i18n = setupI18n({
   globalInjection: true,
-  silentFallbackWarn: true,
+  missingWarn: true,
   legacy: false,
+  locale: "en",
   messages: {
-    en
+    en,
+    zh
   }
 })
 const router = setupRouter(i18n)

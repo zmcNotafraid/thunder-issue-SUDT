@@ -10,7 +10,7 @@ import Issue from '../views/Issue.vue'
 import Transfer from '../views/Transfer.vue'
 
 export function setupRouter(i18n: I18n): Router {
-  const SUPPORT_LOCALES = ['en-US', 'zh-CN']
+  const SUPPORT_LOCALES = ['en', 'zh']
 
   const routes: RouteRecordRaw[] = [
     {
@@ -41,7 +41,7 @@ export function setupRouter(i18n: I18n): Router {
 
   router.beforeEach((to, from, next) => {
     Modal.destroyAll()
-    const locale = localStorage.getItem("locale") || "en-US" as Locale
+    const locale = localStorage.getItem("locale") || "en" as Locale
 
     // check locale
     if (!SUPPORT_LOCALES.includes(locale)) {

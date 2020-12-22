@@ -53,10 +53,10 @@
             </a>
             <template #overlay>
               <a-menu @click="switchLocale">
-                <a-menu-item key="zh-CN">
+                <a-menu-item key="zh">
                   <a href="javascript:;">简体中文</a>
                 </a-menu-item>
-                <a-menu-item key="en-US">
+                <a-menu-item key="en">
                   <a href="javascript:;">EN</a>
                 </a-menu-item>
               </a-menu>
@@ -106,7 +106,7 @@ export default defineComponent({
   data() {
     return {
       locale:
-          window.localStorage.getItem('locale') === 'zh-CN' ? '简体中文' : 'EN'
+          window.localStorage.getItem('locale') === 'zh' ? '简体中文' : 'EN'
     }
   },
   methods: {
