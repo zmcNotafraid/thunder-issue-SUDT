@@ -1,6 +1,6 @@
-import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst } from "./index"
+import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst, queryAddresses } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
-import { Modal, Spin } from 'ant-design-vue'
+import { message, Modal, Spin } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
 import { h, VNode, ComponentPublicInstance } from "vue"
 
@@ -80,4 +80,36 @@ export const showTransactionModal = async (tx: string, componentInstance: Compon
     }
   }
   setTimeout(() => { updateModal(infoModal, tx) }, 5000)
+}
+
+export const isKeyperingConnected = async (componentInstance: ComponentPublicInstance): Promise<boolean> => {
+  try {
+    const address = await queryAddresses("")
+    if (address === undefined) {
+      message.error(componentInstance.$t("errors.noAddress"))
+      return false
+    } else {
+      return true
+    }
+  } catch (error) {
+    if (error.message === "Failed to fetch") {
+      const vnode: VNode =
+        h(
+          'span',
+          [
+            componentInstance.$t("errors.keypering"),
+            h('a', {
+              href: 'https://github.com/nervosnetwork/keypering/releases',
+              target: "_blank"
+            },
+            'https://github.com/nervosnetwork/keypering/releases'
+            )
+          ]
+        )
+      message.error(vnode)
+      return false
+    } else {
+      return true
+    }
+  }
 }

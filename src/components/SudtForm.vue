@@ -68,7 +68,8 @@ import {
   toUint128Le,
   showTransactionModal,
   parseSudtInfoData,
-  getNetworkConst
+  getNetworkConst,
+  isKeyperingConnected
 } from '@/utils'
 import { UnderscoreCell } from '../interface/index'
 import { defineComponent } from 'vue'
@@ -151,6 +152,13 @@ const Component = defineComponent({
     wrapperColumn: Number
   },
   async mounted() {
+    if (!(await isKeyperingConnected(this))) {
+      this.form.name = ""
+      this.form.symbol = ""
+      this.form.decimal = 8
+      return
+    }
+
     const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
     sudtInfoTypeScript.args = window.localStorage.getItem("lockHash") || ""
 

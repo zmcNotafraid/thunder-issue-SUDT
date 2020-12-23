@@ -51,7 +51,8 @@ import {
   getCells,
   parseSudtInfoData,
   getNetworkConst,
-  underscoreScriptKey
+  underscoreScriptKey,
+  isKeyperingConnected
 } from '@/utils'
 import SudtFormComponent from '../components/SudtForm.vue'
 
@@ -65,7 +66,7 @@ export default defineComponent({
       confirmLoading: false,
       name: '',
       symbol: '',
-      decimal: 0,
+      decimal: 8,
       address: ''
     }
   },
@@ -73,6 +74,13 @@ export default defineComponent({
     const authToken: string | null = window.localStorage.getItem('authToken')
     if (!authToken) {
       message.error(this.$t("errors.noAuth"))
+      return
+    }
+    if (!(await isKeyperingConnected(this))) {
+      this.name = ""
+      this.symbol = ""
+      this.decimal = 8
+      this.address = ""
       return
     }
 
