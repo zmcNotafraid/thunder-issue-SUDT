@@ -84,7 +84,7 @@ export const showTransactionModal = async (tx: string, componentInstance: Compon
 
 export const isKeyperingConnected = async (componentInstance: ComponentPublicInstance): Promise<boolean> => {
   try {
-    const address = await queryAddresses("")
+    const address = await queryAddresses(window.localStorage.getItem("authToken") || "")
     if (address === undefined) {
       message.error(componentInstance.$t("errors.noAddress"))
       return false
