@@ -46,7 +46,8 @@ export const showTransactionModal = async (tx: string, componentInstance: Compon
     content: pendingVnode,
     centered: true,
     okText: componentInstance.$t('modal.close'),
-    okButtonProps: { disabled: true }
+    okButtonProps: { disabled: true },
+    keyboard: false
   })
 
   const updateModal = async (modal: { destroy: () => void; update?: (newConfig: ModalFuncProps) => void }, tx: string) => {
@@ -73,6 +74,7 @@ export const showTransactionModal = async (tx: string, componentInstance: Compon
         maskClosable: true,
         centered: true,
         onOk: () => { setTimeout(componentInstance.$router.go, 1000) },
+        onCancel: () => { setTimeout(componentInstance.$router.go, 1000) },
         okText: componentInstance.$t('modal.close')
       })
     } else {
