@@ -4,7 +4,7 @@ import { message, Modal, Spin } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
 import { h, VNode, ComponentPublicInstance } from "vue"
 
-export const combineInputCells = async (): Promise<Array<UnderscoreCell>> => {
+export const combineInputCells = async (): Promise<Array<UnderscoreCell> | []> => {
   const lockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
   const cells = await getCells('lock', lockScript)
   if (cells.length === 0) {

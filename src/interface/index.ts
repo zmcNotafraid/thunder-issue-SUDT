@@ -10,7 +10,7 @@ export interface UnderscoreCell {
   output: {
     capacity: string;
     lock: UnderscoreScript;
-    type: UnderscoreScript;
+    type: UnderscoreScript | null;
   }
   output_data: string;
   out_point: {

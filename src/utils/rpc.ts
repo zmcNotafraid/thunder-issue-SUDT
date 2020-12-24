@@ -19,7 +19,7 @@ export const requestAuth = async (description: string): Promise<{token: string, 
   return data.result
 }
 
-export const queryAddresses = async (token: string): Promise<AccountList> => {
+export const queryAddresses = async (token: string): Promise<AccountList | undefined> => {
   const response = await fetch(KEYPERING_URL, {
     method: 'POST',
     headers: {
@@ -35,7 +35,7 @@ export const queryAddresses = async (token: string): Promise<AccountList> => {
   return data.result
 }
 
-export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreScript): Promise<Array<UnderscoreCell>> => {
+export const getCells = async (scriptType: 'lock' | 'type', script: UnderscoreScript): Promise<Array<UnderscoreCell> | []> => {
   const payload = {
     id: 1,
     jsonrpc: '2.0',

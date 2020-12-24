@@ -15,55 +15,15 @@ import {
   toUint128Le,
   underscoreScriptKey
 } from '@/utils/parser'
+import { hybridCells, sudtCells } from '../mock/cells'
 
 describe("calCapacityAmount", () => {
   it("returns correct data", () => {
-    const cells: Array<UnderscoreCell> = [
-      {
-        output: {
-          capacity: '0x3e8',
-          lock: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          },
-          type: {
-            code_hash: "", hash_type: "type",
-            args: ""
-          }
-        },
-        output_data: "0x",
-        out_point: {
-          tx_hash: "",
-          index: ''
-        },
-        block_number: "",
-        tx_index: ""
-      },
-      {
-        output: {
-          capacity: '0x3e8',
-          lock: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          },
-          type: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          }
-        },
-        output_data: "0xabcde",
-        out_point: {
-          tx_hash: "",
-          index: ''
-        },
-        block_number: "",
-        tx_index: ""
-      }
-    ]
-    expect(calCapacityAmount(cells)).toEqual({ free: BigInt(1000), capacity: BigInt(2000) })
+    expect(calCapacityAmount(hybridCells)).toEqual({ free: BigInt(1000), capacity: BigInt(11000) })
+  })
+
+  it("returns 0 free capacity", () => {
+    expect(calCapacityAmount(sudtCells)).toEqual({ free: BigInt(0), capacity: BigInt(2000) })
   })
 })
 
@@ -174,58 +134,23 @@ describe('parseSudtInfoData', () => {
       }
     )
   })
+
+  it('returns info when cause error', () => {
+    const data = "0x06"
+    expect(parseSudtInfoData(data)).toEqual(
+      {
+        decimal: -1,
+        name: '',
+        symbol: "",
+        restInfos: [{}]
+      }
+    )
+  })
 })
 
 describe('calSudtAmount', () => {
   it('returns sudt amount', () => {
-    const cells: Array<UnderscoreCell> = [
-      {
-        output: {
-          capacity: '0x3e8',
-          lock: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          },
-          type: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          }
-        },
-        output_data: "0xe8030000000000000000000000000000",
-        out_point: {
-          tx_hash: "",
-          index: ''
-        },
-        block_number: "",
-        tx_index: ""
-      },
-      {
-        output: {
-          capacity: '0x3e8',
-          lock: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          },
-          type: {
-            code_hash: "",
-            hash_type: "type",
-            args: ""
-          }
-        },
-        output_data: "0xe8030000000000000000000000000000",
-        out_point: {
-          tx_hash: "",
-          index: ''
-        },
-        block_number: "",
-        tx_index: ""
-      }
-    ]
-
-    expect(calSudtAmount(cells)).toEqual(BigInt(2000))
+    expect(calSudtAmount(sudtCells)).toEqual(BigInt(2000))
   })
 })
 
