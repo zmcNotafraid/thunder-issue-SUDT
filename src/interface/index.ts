@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 
-export type ScriptHashType = 'data' | 'type'
 export interface UnderscoreScript {
   code_hash: string;
   hash_type: 'data' | 'type';

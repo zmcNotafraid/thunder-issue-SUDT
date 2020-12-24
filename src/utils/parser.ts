@@ -21,10 +21,14 @@ export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free:
   }
 }
 
-export const parseBigIntStringNumber = function (number: bigint, decimal = 8): string {
+export const parseBigIntStringNumber = function (number: bigint, decimal : number= 8): string {
   const stringBigInt = number.toString()
   const length = stringBigInt.length
-  return `${stringBigInt.slice(0, length - decimal)}.${stringBigInt.slice(length - decimal)}`
+  if (length <= decimal) {
+    return `0.${stringBigInt.padStart(decimal - length, "0")}`
+  } else {
+    return `${stringBigInt.slice(0, length - decimal)}.${stringBigInt.slice(length - decimal)}`
+  }
 }
 
 export const getRawTxTemplate = (): CKBComponents.RawTransactionToSign => {
@@ -59,7 +63,7 @@ export const camelCaseScriptKey = (ckbScript: UnderscoreScript): CKBComponents.S
   return { codeHash: ckbScript.code_hash, hashType: ckbScript.hash_type, args: ckbScript.args }
 }
 
-export const compareScript = (script1: UnderscoreScript, script2: UnderscoreScript): boolean => {
+export const compareScript = (script1: UnderscoreScript | null, script2: UnderscoreScript | null): boolean => {
   if (script1 === null || script2 === null) {
     return false
   }
