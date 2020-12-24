@@ -21,7 +21,7 @@ export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free:
   }
 }
 
-export const parseBigIntStringNumber = function (number: bigint, decimal : number= 8): string {
+export const parseBigIntStringNumber = function (number: bigint, decimal = 8): string {
   const stringBigInt = number.toString()
   const length = stringBigInt.length
   if (length <= decimal) {

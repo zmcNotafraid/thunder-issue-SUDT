@@ -83,7 +83,7 @@ export default defineComponent({
       }
 
       try {
-        const results: AccountList = await queryAddresses(authToken)
+        const results: AccountList | undefined = await queryAddresses(authToken)
         if (results === undefined) {
           message.error(this.$t("errors.noAddress"))
           this.loading = false

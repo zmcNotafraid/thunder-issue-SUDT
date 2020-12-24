@@ -4,8 +4,6 @@ import { combineInputCells, getBiggestCapacityCell, isKeyperingConnected, showTr
 import { ComponentPublicInstance } from 'vue'
 import { capacityCells, hybridCells } from '../mock/cells'
 import { addresses } from '../mock/accounts'
-import { TranslateResult } from 'vue-i18n'
-
 
 describe('combineInputCells', () => {
   afterAll(() => {
@@ -49,17 +47,25 @@ describe('getBiggestCapacityCell', () => {
 })
 
 describe('showTransactionModal', () => {
-  const fn = jest.fn() as unknown as ComponentPublicInstance
-  fn.$t = jest.fn()
+  afterAll(() => {
+    jest.restoreAllMocks()
+  })
+
 
   it('returns false when address is undefined', async () => {
-    jest.spyOn(utils, "getTransaction").mockResolvedValue({ tx_stauts: { status: "committed"}})
+    const fn = jest.fn() as unknown as ComponentPublicInstance
+    fn.$t = jest.fn()
+    jest.spyOn(utils, "getTransaction").mockResolvedValue({ tx_status: { status: "committed"}})
 
     await expect(showTransactionModal("0xtx", fn)).resolves.toEqual(undefined)
   })
 })
 
 describe('isKeyperingConnected', () => {
+  afterAll(() => {
+    jest.restoreAllMocks();
+  })
+
   const fn = jest.fn() as unknown as ComponentPublicInstance
 
   it('returns false when address is undefined', async () => {
@@ -89,5 +95,4 @@ describe('isKeyperingConnected', () => {
 
     await expect(isKeyperingConnected(fn)).resolves.toBeTruthy
   })
-
 })
