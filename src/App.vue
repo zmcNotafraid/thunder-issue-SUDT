@@ -72,7 +72,7 @@
         </div>
       </a-layout-content>
       <a-layout-footer style="textalign: center">
-        Thunder Issue SUDT ©2020
+        Thunder Issue SUDT ©2020 <a href="https://github.com/zmcNotafraid/thunder-issue-SUDT" target="_blank">Source Code</a>
       </a-layout-footer>
     </a-layout>
   </a-layout>
