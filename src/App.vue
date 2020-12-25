@@ -72,7 +72,7 @@
         </div>
       </a-layout-content>
       <a-layout-footer style="textalign: center">
-        Thunder Issue SUDT ©2020 Created by Nervos
+        Thunder Issue SUDT ©2020
       </a-layout-footer>
     </a-layout>
   </a-layout>
