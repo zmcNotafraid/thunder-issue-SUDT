@@ -4,5 +4,5 @@ module.exports = {
     "^.+\\.vue$": "vue-jest"
   },
   transformIgnorePatterns: ['/node_modules/(?!lodash-es). \\.js$'],
-  setupFiles: ["jest-localstorage-mock"]
+  setupFiles: ["jest-localstorage-mock", '<rootDir>/tests/unit/setups/setup.ts']
 }
