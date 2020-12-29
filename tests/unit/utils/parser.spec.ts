@@ -15,6 +15,7 @@ import {
   toUint128Le,
   underscoreScriptKey
 } from '@/utils/parser'
+import { ComponentPublicInstance } from 'vue'
 import { hybridCells, sudtCells } from '../mock/cells'
 
 describe("calCapacityAmount", () => {
@@ -123,9 +124,12 @@ describe("hexToString", () => {
 })
 
 describe('parseSudtInfoData', () => {
+  const fn = jest.fn() as unknown as ComponentPublicInstance
+  fn.$t = jest.fn()
+
   it('returns correct info', () => {
     const data = "0x060a55534420436f696e0a555344430a546f74616c737570706c793a31303030303030302e303030303030"
-    expect(parseSudtInfoData(data)).toEqual(
+    expect(parseSudtInfoData(data, fn)).toEqual(
       {
         decimal: 6,
         name: 'USD Coin',
@@ -137,7 +141,7 @@ describe('parseSudtInfoData', () => {
 
   it('returns correct info when decimal is 10', () => {
     const data = "0x0a0a55534420436f696e0a555344430a546f74616c737570706c793a31303030303030302e303030303030"
-    expect(parseSudtInfoData(data)).toEqual(
+    expect(parseSudtInfoData(data, fn)).toEqual(
       {
         decimal: 10,
         name: 'USD Coin',
@@ -149,7 +153,7 @@ describe('parseSudtInfoData', () => {
 
   it('returns info when cause error', () => {
     const data = "0x06"
-    expect(parseSudtInfoData(data)).toEqual(
+    expect(parseSudtInfoData(data, fn)).toEqual(
       {
         decimal: -1,
         name: '',

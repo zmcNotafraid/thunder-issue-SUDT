@@ -36,7 +36,7 @@
       {{ symbol }}
     </a-descriptions-item>
     <a-descriptions-item :label="$t('labels.tokenDecimal')">
-      {{ decimal }}
+      {{ decimal === -1 ? "" : decimal }}
     </a-descriptions-item>
     <a-descriptions-item :label="$t('labels.tokenIssuer')">
       {{ address }}
@@ -66,7 +66,7 @@ export default defineComponent({
       confirmLoading: false,
       name: '',
       symbol: '',
-      decimal: 8,
+      decimal: -1,
       address: ''
     }
   },
@@ -79,7 +79,7 @@ export default defineComponent({
     if (!(await isKeyperingConnected(this))) {
       this.name = ""
       this.symbol = ""
-      this.decimal = 8
+      this.decimal = -1
       this.address = ""
       return
     }
@@ -91,7 +91,8 @@ export default defineComponent({
     if (cells.length === 0) {
       return
     }
-    const sudtInfo = parseSudtInfoData(cells[0].output_data)
+    const sudtInfo = parseSudtInfoData(cells[0].output_data, this)
+
     this.name = sudtInfo.name
     this.symbol = sudtInfo.symbol
     this.decimal = sudtInfo.decimal
