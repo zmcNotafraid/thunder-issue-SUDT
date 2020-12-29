@@ -1,6 +1,8 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO } from './index'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
+import { message } from 'ant-design-vue'
+import { ComponentPublicInstance } from 'vue'
 
 export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
   const capacity = cells
@@ -80,7 +82,7 @@ export const hexToString = (hex: string): string => {
   return Buffer.from(hex, 'hex').toString('utf-8')
 }
 
-export const parseSudtInfoData = (hexData: string): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
+export const parseSudtInfoData = (hexData: string, componentInstance: ComponentPublicInstance): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
   try {
     let data = hexData
     if (hexData.slice(0, 6) === "0x0a0a") {
@@ -104,6 +106,7 @@ export const parseSudtInfoData = (hexData: string): {decimal: number, name: stri
       restInfos: restInfos
     }
   } catch (error) {
+    message.error(componentInstance.$t("errors.infoParseError"))
     return {
       decimal: -1,
       name: "",

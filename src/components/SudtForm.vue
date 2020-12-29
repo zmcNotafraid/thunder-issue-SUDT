@@ -78,7 +78,6 @@ const Component = defineComponent({
   data: function () {
     return {
       infoExist: false,
-      infoParseError: false,
       form: {
         name: '',
         symbol: '',
@@ -164,11 +163,7 @@ const Component = defineComponent({
 
     const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
     if (sudtInfoCells.length > 0) {
-      const data = parseSudtInfoData(sudtInfoCells[0].output_data)
-      if (data.name === "" || data.symbol === "" || data.decimal === -1) {
-        this.infoParseError = true
-        return
-      }
+      const data = parseSudtInfoData(sudtInfoCells[0].output_data, this)
       this.form.name = data.name
       this.form.symbol = data.symbol
       this.form.decimal = data.decimal

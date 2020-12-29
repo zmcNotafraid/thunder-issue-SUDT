@@ -39,7 +39,8 @@ export default {
     noCells: "没有可用的 Cell!",
     keypering: "请确保 Keypering 正在运行，或者可以在此下载: ",
     provideCkbNeeded: "你需要提供 Cell 必须的 CKB 才能进行转账",
-    noAcpCell: "接收者没有可用的代币 ACP Cell, 请联系他创建一个."
+    noAcpCell: "接收者没有可用的代币 ACP Cell, 请联系他创建一个.",
+    infoParseError: "Sudt info data 字段格式解析失败"
   },
   success: {
     auth: "认证成功"

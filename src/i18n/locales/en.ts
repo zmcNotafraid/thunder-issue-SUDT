@@ -39,7 +39,8 @@ export default {
     noCells: "No avaiable cells",
     keypering: "Please make sure Keypering is running, and you could download it here: ",
     provideCkbNeeded: "You cannot send token to this kind of address if you don't provide the necessary CKB capacity.",
-    noAcpCell: "Receiver has no available asset account, please ask him create one first."
+    noAcpCell: "Receiver has no available asset account, please ask him create one first.",
+    infoParseError: "Sudt info data format not support"
   },
   success: {
     auth: "Auth Success"
