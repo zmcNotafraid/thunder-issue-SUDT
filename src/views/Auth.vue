@@ -9,7 +9,7 @@
       </div>
     </a-col>
   </a-row>
-  <a-spin tip="Loading..." :spinning="$t('title.loading')">
+  <a-spin :tip="$t('title.loading')" :spinning="loading">
     <a-descriptions :title="$t('title.walletInfo')" bordered>
       <a-descriptions-item :label="$t('labels.address')" :span="3">
         {{ address }}
