@@ -27,7 +27,9 @@ export default {
     walletInfo: "Wallet Info",
     tokenInfo: "Token Info",
     root: "Thunder Issue SUDT",
-    updateSudtInfo: "Update SUDT Info"
+    updateSudtInfo: "Update SUDT Info",
+    notice: "Notice",
+    loading: "loading..."
   },
   placeholder: {
     maxLength: "Max length is {length}"
@@ -44,6 +46,11 @@ export default {
   },
   success: {
     auth: "Auth Success"
+  },
+  warning: {
+    infoFirst: "Only the owner can update the token info. ",
+    infoSecond: "Before updating the token info, please make sure you have connected the right wallet with proper network.",
+    infoThird: "Although there is no limit to the number of times you can update your token information, please do so with caution."
   },
   validations: {
     required: "{ field } is required!",

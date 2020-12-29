@@ -27,7 +27,10 @@ export default {
     walletInfo: "钱包信息",
     tokenInfo: "代币信息",
     root: "一键发币",
-    updateSudtInfo: "更新代币信息"
+    updateSudtInfo: "更新代币信息",
+    notice: "提示",
+    loading: "加载中..."
+
   },
   placeholder: {
     maxLength: "最大支持 {length} 位"
@@ -44,6 +47,11 @@ export default {
   },
   success: {
     auth: "认证成功"
+  },
+  warning: {
+    infoFirst: "只有代码拥有者才可以更新信息",
+    infoSecond: "在更新操作前，请确认你已连接上正确的钱包和网络",
+    infoThird: "请谨慎操作更新信息"
   },
   validations: {
     required: "{ field } 是必填项!",

@@ -20,7 +20,8 @@ import {
   Spin,
   Modal,
   Dropdown,
-  InputNumber
+  InputNumber,
+  Card
 } from 'ant-design-vue'
 
 const app = createApp(App)
@@ -51,6 +52,7 @@ app.use(Divider)
 app.use(Spin)
 app.use(Modal)
 app.use(Dropdown)
+app.use(Card)
 
 app.use(i18n)
 app.use(router)
