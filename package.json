@@ -12,7 +12,7 @@
     "@nervosnetwork/ckb-sdk-core": "0.38.2",
     "@nervosnetwork/ckb-sdk-rpc": "0.38.2",
     "@nervosnetwork/ckb-sdk-utils": "0.38.2",
-    "ant-design-vue": "2.0.0-rc.2",
+    "ant-design-vue": "2.0.0-rc.7",
     "core-js": "3",
     "less": "^3.12.2",
     "less-loader": "^7.0.1",
