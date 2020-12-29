@@ -7,8 +7,8 @@ import { addresses } from '../mock/accounts'
 
 describe('combineInputCells', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
-  });
+    jest.restoreAllMocks()
+  })
 
   it('returns [] when no cells', async () => {
     jest.spyOn(utils, "getCells").mockResolvedValue([])
@@ -31,8 +31,8 @@ describe('combineInputCells', () => {
 
 describe('getBiggestCapacityCell', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
-  });
+    jest.restoreAllMocks()
+  })
 
   it('returns biggest cell', async () => {
     jest.spyOn(utils, "getCells").mockResolvedValue(capacityCells)
@@ -51,11 +51,10 @@ describe('showTransactionModal', () => {
     jest.restoreAllMocks()
   })
 
-
   it('returns false when address is undefined', async () => {
     const fn = jest.fn() as unknown as ComponentPublicInstance
     fn.$t = jest.fn()
-    jest.spyOn(utils, "getTransaction").mockResolvedValue({ tx_status: { status: "committed"}})
+    jest.spyOn(utils, "getTransaction").mockResolvedValue({ tx_status: { status: "committed" } })
 
     await expect(showTransactionModal("0xtx", fn)).resolves.toEqual(undefined)
   })
@@ -63,7 +62,7 @@ describe('showTransactionModal', () => {
 
 describe('isKeyperingConnected', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
+    jest.restoreAllMocks()
   })
 
   const fn = jest.fn() as unknown as ComponentPublicInstance
