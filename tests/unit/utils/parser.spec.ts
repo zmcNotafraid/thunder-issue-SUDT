@@ -1,4 +1,4 @@
-import { UnderscoreCell, UnderscoreScript } from '@/interface'
+import { UnderscoreScript } from '@/interface'
 import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO } from '@/utils'
 import {
   calCapacityAmount,
@@ -43,7 +43,7 @@ describe('getRawTxTemplate', () => {
       {
         version: '0x0',
         cellDeps: [
-          TESTNET_SCRIPT_INFO["SUDT_CELL_DEP"]
+          TESTNET_SCRIPT_INFO.SUDT_CELL_DEP
         ],
         headerDeps: [],
         inputs: [],
@@ -70,7 +70,7 @@ describe('readBigUInt128Le', () => {
 
 describe('underscoreScriptKey', () => {
   it('returns underscore keys', () => {
-    expect(underscoreScriptKey({ codeHash: "", hashType: "type", args: "" })).toEqual({code_hash: "", hash_type: "type", args: ""})
+    expect(underscoreScriptKey({ codeHash: "", hashType: "type", args: "" })).toEqual({ code_hash: "", hash_type: "type", args: "" })
   })
 })
 
@@ -135,6 +135,18 @@ describe('parseSudtInfoData', () => {
     )
   })
 
+  it('returns correct info when decimal is 10', () => {
+    const data = "0x0a0a55534420436f696e0a555344430a546f74616c737570706c793a31303030303030302e303030303030"
+    expect(parseSudtInfoData(data)).toEqual(
+      {
+        decimal: 10,
+        name: 'USD Coin',
+        symbol: "USDC",
+        restInfos: [{ Totalsupply: "10000000.000000" }]
+      }
+    )
+  })
+
   it('returns info when cause error', () => {
     const data = "0x06"
     expect(parseSudtInfoData(data)).toEqual(
@@ -160,11 +172,11 @@ describe('getNetworkConst', () => {
   })
 
   it('returns testnet sudt script', () => {
-    expect(getNetworkConst("SUDT_TYPE_SCRIPT")).toEqual(TESTNET_SCRIPT_INFO["SUDT_TYPE_SCRIPT"])
+    expect(getNetworkConst("SUDT_TYPE_SCRIPT")).toEqual(TESTNET_SCRIPT_INFO.SUDT_TYPE_SCRIPT)
   })
 
   it('returns mainnet sudt script', () => {
     localStorage.setItem("networkId", "ckb")
-    expect(getNetworkConst("SUDT_TYPE_SCRIPT")).toEqual(MAINNET_SCRIPT_INFO["SUDT_TYPE_SCRIPT"])
+    expect(getNetworkConst("SUDT_TYPE_SCRIPT")).toEqual(MAINNET_SCRIPT_INFO.SUDT_TYPE_SCRIPT)
   })
 })

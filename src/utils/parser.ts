@@ -80,9 +80,13 @@ export const hexToString = (hex: string): string => {
   return Buffer.from(hex, 'hex').toString('utf-8')
 }
 
-export const parseSudtInfoData = (data: string): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
+export const parseSudtInfoData = (hexData: string): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
   try {
-    const [decimal, name, symbol, ...other] = data.slice(2).split("0a")
+    let data = hexData
+    if (hexData.slice(0, 6) === "0x0a0a") {
+      data = data.replace("0x0a", "0xa")
+    }
+    const [decimal, name, symbol, ...other] = data.split("0a")
     let restInfos: Array<Record<string, unknown>> = []
     if (other !== [""]) {
       restInfos = other.map(field => {
