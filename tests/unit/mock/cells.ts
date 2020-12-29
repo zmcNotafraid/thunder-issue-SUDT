@@ -4,7 +4,8 @@ import { TESTNET_SCRIPT_INFO, underscoreScriptKey } from '@/utils'
 export const hybridCells: Array<UnderscoreCell> = [
   {
     output: {
-      capacity: '0x3e8',
+      // 1000 CKB
+      capacity: '0x174876e800',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",
@@ -22,7 +23,8 @@ export const hybridCells: Array<UnderscoreCell> = [
   },
   {
     output: {
-      capacity: '0x2710',
+      // 10000 CKB
+      capacity: '0xe8d4a51000',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",
@@ -43,7 +45,7 @@ export const hybridCells: Array<UnderscoreCell> = [
 export const sudtCells: Array<UnderscoreCell> = [
   {
     output: {
-      capacity: '0x3e8',
+      capacity: '0x174876e800',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",
@@ -61,7 +63,7 @@ export const sudtCells: Array<UnderscoreCell> = [
   },
   {
     output: {
-      capacity: '0x3e8',
+      capacity: '0x174876e800',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",
@@ -82,7 +84,7 @@ export const sudtCells: Array<UnderscoreCell> = [
 export const capacityCells: Array<UnderscoreCell> = [
   {
     output: {
-      capacity: '0x3e8',
+      capacity: '0x174876e800',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",
@@ -100,7 +102,8 @@ export const capacityCells: Array<UnderscoreCell> = [
   },
   {
     output: {
-      capacity: '0x2710',
+      // 10000 CKB
+      capacity: '0xe8d4a51000',
       lock: {
         code_hash: "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
         hash_type: "type",

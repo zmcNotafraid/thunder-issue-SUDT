@@ -11,7 +11,7 @@ export const addresses: AccountList = {
         args: "0x512000882efceaa8bda5abbef14dc5ea188997c2"
       },
       lockScriptMeta: {
-        name: '',
+        name: 'Secp256k1',
         cellDeps: [],
         headerDeps: []
       },

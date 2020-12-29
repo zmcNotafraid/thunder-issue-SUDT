@@ -20,11 +20,11 @@ import { hybridCells, sudtCells } from '../mock/cells'
 
 describe("calCapacityAmount", () => {
   it("returns correct data", () => {
-    expect(calCapacityAmount(hybridCells)).toEqual({ free: BigInt(1000), capacity: BigInt(11000) })
+    expect(calCapacityAmount(hybridCells)).toEqual({ free: BigInt(100000000000), capacity: BigInt(1100000000000) })
   })
 
   it("returns 0 free capacity", () => {
-    expect(calCapacityAmount(sudtCells)).toEqual({ free: BigInt(0), capacity: BigInt(2000) })
+    expect(calCapacityAmount(sudtCells)).toEqual({ free: BigInt(0), capacity: BigInt(200000000000) })
   })
 })
 
