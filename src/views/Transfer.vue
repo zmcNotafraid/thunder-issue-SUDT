@@ -41,7 +41,8 @@ import {
   getCells,
   underscoreScriptKey,
   showTransactionModal,
-  getNetworkConst
+  getNetworkConst,
+  isKeyperingConnected
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -63,6 +64,11 @@ export default defineComponent({
     }
   },
   async mounted() {
+    if (!(await isKeyperingConnected(this))) {
+      this.currentSudtCount = "0"
+      return
+    }
+
     const inputCells = await combineInputCells()
     this.inputCells = [...inputCells]
     if (inputCells.length === 0) {
