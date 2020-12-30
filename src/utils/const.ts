@@ -36,12 +36,12 @@ export const TESTNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDe
 
   ACP_CELL_DEP: {
     outPoint: {
-      txHash: "0x4f32b3e39bd1b6350d326fdfafdfe05e5221865c3098ae323096f0bfc69e0a8c",
+      txHash: "0xec26b0f85ed839ece5f11c4c4e837ec359f5adc4420410f6453b1f6b60fb96a6",
       index: "0x0"
     },
     depType: "depGroup"
   } as CKBComponents.CellDep,
-  ACP_CODE_HASH: "0x86a1c6987a4acbe1a887cca4c9dd2ac9fcb07405bbeda51b861b18bbf7492c4b",
+  ACP_CODE_HASH: "0x3419a1c09eb2567f6552ee7a8ecffd64155cffe0f1796e6e61ec088d740c1356",
   PW_CELL_DEP: {
     outPoint: {
       txHash: "0x57a62003daeab9d54aa29b944fc3b451213a5ebdf2e232216a3cfed0dde61b38",

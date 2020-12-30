@@ -49,8 +49,9 @@ export default {
   },
   warning: {
     infoFirst: "Only the owner can update the token info. ",
-    infoSecond: "Before updating the token info, please make sure you have connected the right wallet with proper network.",
-    infoThird: "Although there is no limit to the number of times you can update your token information, please do so with caution."
+    infoSecond: "If you have already issued the token but have not set up its info yet, you can also set your token info here via the ‘Update Token Info’ button above.",
+    infoThird: "Before updating the token info, please make sure you have connected the right wallet with proper network.",
+    infoFourth: "Although there is no limit to the number of times you can update your token information, please do so with caution."
   },
   validations: {
     required: "{ field } is required!",

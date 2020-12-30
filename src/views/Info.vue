@@ -19,6 +19,7 @@
       <li>{{ $t('warning.infoFirst') }}</li>
       <li>{{ $t('warning.infoSecond') }}</li>
       <li>{{ $t('warning.infoThird') }}</li>
+      <li>{{ $t('warning.infoFourth') }}</li>
     </ol>
   </a-card>
   <div>
