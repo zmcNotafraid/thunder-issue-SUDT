@@ -14,7 +14,6 @@ import {
   toUint128Le,
   underscoreScriptKey
 } from '@/utils/parser'
-import { ComponentPublicInstance } from 'vue'
 import { hybridCells, sudtCells } from '../mock/cells'
 
 describe("calCapacityAmount", () => {
