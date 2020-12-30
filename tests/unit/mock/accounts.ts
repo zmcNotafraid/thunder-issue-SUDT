@@ -1,4 +1,4 @@
-import { AccountList } from '@/interface';
+import { AccountList } from '@/interface'
 
 export const addresses: AccountList = {
   addresses: [

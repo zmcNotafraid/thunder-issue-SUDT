@@ -163,7 +163,7 @@ const Component = defineComponent({
 
     const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
     if (sudtInfoCells.length > 0) {
-      const data = parseSudtInfoData(sudtInfoCells[0].output_data, this)
+      const data = parseSudtInfoData(sudtInfoCells[0].output_data)
       this.form.name = data.name
       this.form.symbol = data.symbol
       this.form.decimal = data.decimal

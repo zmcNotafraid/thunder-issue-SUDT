@@ -1,8 +1,6 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
 import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO } from './index'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
-import { message } from 'ant-design-vue'
-import { ComponentPublicInstance } from 'vue'
 
 export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
   const capacity = cells
@@ -78,41 +76,16 @@ export const stringToHex = (string: string): string => {
   return Buffer.from(string).toString('hex')
 }
 
-export const hexToString = (hex: string): string => {
-  return Buffer.from(hex, 'hex').toString('utf-8')
-}
-
-export const parseSudtInfoData = (hexData: string, componentInstance: ComponentPublicInstance): {decimal: number, name: string, symbol: string, restInfos: Array<Record<string, unknown>> } => {
-  try {
-    let data = hexData
-    if (hexData.slice(0, 6) === "0x0a0a") {
-      data = data.replace("0x0a", "0xa")
-    }
-    const [decimal, name, symbol, ...other] = data.split("0a")
-    let restInfos: Array<Record<string, unknown>> = []
-    if (other !== [""]) {
-      restInfos = other.map(field => {
-        const key: string = field.split("3a")[0]
-        const value: string = field.split("3a")[1]
-        const _obj: Record<string, unknown> = {}
-        _obj[hexToString(key)] = hexToString(value)
-        return _obj
-      })
-    }
-    return {
-      decimal: parseInt(decimal),
-      name: hexToString(name),
-      symbol: hexToString(symbol),
-      restInfos: restInfos
-    }
-  } catch (error) {
-    message.error(componentInstance.$t("errors.infoParseError"))
-    return {
-      decimal: -1,
-      name: "",
-      symbol: "",
-      restInfos: [{}]
-    }
+export const parseSudtInfoData = (hexData: string): { decimal: number, name: string, symbol: string, restInfos: Array<string> } => {
+  const bytesData = Buffer.from(hexData.slice(2), 'hex')
+  const decimal = bytesData[0]
+  const othersData = bytesData.slice(2).toString('utf-8')
+  const [name, symbol, ...other] = othersData.split("\n")
+  return {
+    decimal: decimal,
+    name: name,
+    symbol: symbol,
+    restInfos: other
   }
 }
 

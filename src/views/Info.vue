@@ -114,7 +114,7 @@ export default defineComponent({
     if (cells.length === 0) {
       return
     }
-    const sudtInfo = parseSudtInfoData(cells[0].output_data, this)
+    const sudtInfo = parseSudtInfoData(cells[0].output_data)
 
     this.name = sudtInfo.name
     this.symbol = sudtInfo.symbol

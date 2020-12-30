@@ -7,7 +7,6 @@ import {
   compareScript,
   getNetworkConst,
   getRawTxTemplate,
-  hexToString,
   parseBigIntStringNumber,
   parseSudtInfoData,
   readBigUInt128LE,
@@ -113,52 +112,15 @@ describe('stringToHex', () => {
   })
 })
 
-describe("hexToString", () => {
-  it("equals 'USD Coin'", () => {
-    expect(hexToString("55534420436f696e")).toEqual("USD Coin")
-  })
-
-  it("equals 'USDC'", () => {
-    expect(hexToString("55534443")).toEqual("USDC")
-  })
-})
-
 describe('parseSudtInfoData', () => {
-  const fn = jest.fn() as unknown as ComponentPublicInstance
-  fn.$t = jest.fn()
-
   it('returns correct info', () => {
-    const data = "0x060a55534420436f696e0a555344430a546f74616c737570706c793a31303030303030302e303030303030"
-    expect(parseSudtInfoData(data, fn)).toEqual(
-      {
-        decimal: 6,
-        name: 'USD Coin',
-        symbol: "USDC",
-        restInfos: [{ Totalsupply: "10000000.000000" }]
-      }
-    )
-  })
-
-  it('returns correct info when decimal is 10', () => {
     const data = "0x0a0a55534420436f696e0a555344430a546f74616c737570706c793a31303030303030302e303030303030"
-    expect(parseSudtInfoData(data, fn)).toEqual(
+    expect(parseSudtInfoData(data)).toEqual(
       {
         decimal: 10,
         name: 'USD Coin',
         symbol: "USDC",
-        restInfos: [{ Totalsupply: "10000000.000000" }]
-      }
-    )
-  })
-
-  it('returns info when cause error', () => {
-    const data = "0x06"
-    expect(parseSudtInfoData(data, fn)).toEqual(
-      {
-        decimal: -1,
-        name: '',
-        symbol: "",
-        restInfos: [{}]
+        restInfos: ['Totalsupply:10000000.000000']
       }
     )
   })

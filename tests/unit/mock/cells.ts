@@ -28,7 +28,7 @@ export const hybridCells: Array<UnderscoreCell> = [
         hash_type: "type",
         args: "0x512000882efceaa8bda5abbef14dc5ea188997c2"
       },
-      type: underscoreScriptKey(TESTNET_SCRIPT_INFO["SUDT_TYPE_SCRIPT"] as CKBComponents.Script)
+      type: underscoreScriptKey(TESTNET_SCRIPT_INFO.SUDT_TYPE_SCRIPT as CKBComponents.Script)
     },
     output_data: "0xe8030000000000000000000000000000",
     out_point: {
@@ -49,7 +49,7 @@ export const sudtCells: Array<UnderscoreCell> = [
         hash_type: "type",
         args: "0x512000882efceaa8bda5abbef14dc5ea188997c2"
       },
-      type: underscoreScriptKey(TESTNET_SCRIPT_INFO["SUDT_TYPE_SCRIPT"] as CKBComponents.Script)
+      type: underscoreScriptKey(TESTNET_SCRIPT_INFO.SUDT_TYPE_SCRIPT as CKBComponents.Script)
     },
     output_data: "0xe8030000000000000000000000000000",
     out_point: {
@@ -67,7 +67,7 @@ export const sudtCells: Array<UnderscoreCell> = [
         hash_type: "type",
         args: "0x512000882efceaa8bda5abbef14dc5ea188997c2"
       },
-      type: underscoreScriptKey(TESTNET_SCRIPT_INFO["SUDT_TYPE_SCRIPT"] as CKBComponents.Script)
+      type: underscoreScriptKey(TESTNET_SCRIPT_INFO.SUDT_TYPE_SCRIPT as CKBComponents.Script)
     },
     output_data: "0xe8030000000000000000000000000000",
     out_point: {
