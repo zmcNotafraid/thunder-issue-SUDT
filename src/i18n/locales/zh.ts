@@ -49,10 +49,10 @@ export default {
     auth: "认证成功"
   },
   warning: {
-    infoFirst: "只有代码拥有者才可以更新信息",
-    infoSecond: "请点击'更新代币信息'按钮当你之前已经创建过代币",
+    infoFirst: "只有代币拥有者才可以更新信息",
+    infoSecond: "如果你之前已经创建过代币， 请点击‘更新代币信息’按钮",
     infoThird: "在更新操作前，请确认你已连接上正确的钱包和网络",
-    infoFourth: "请谨慎操作更新信息"
+    infoFourth: "尽管我们没有次数时间限制，但是请谨慎操作更新信息"
   },
   validations: {
     required: "{ field } 是必填项!",
