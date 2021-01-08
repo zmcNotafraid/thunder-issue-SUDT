@@ -1,6 +1,7 @@
 export default {
   buttons: {
     connect: '连接钱包',
+    connectedDevnet: '已连接(本地开发网)',
     connectedTestnet: '已连接(测试网)',
     connectedMainnet: '已连接(主网)',
     submit: '提交',

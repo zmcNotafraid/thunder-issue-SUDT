@@ -3,6 +3,54 @@ export const SECP256K1_BLAKE160_CODE_HASH = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9f
 export const FEE_RATIO = BigInt(1_000)
 export const SUDT_SMALLEST_CAPACITY = BigInt(142 * 10 ** 8)
 export const SUDT_INFO_SMALLEST_CAPACITY = BigInt(169 * 10 ** 8)
+export const DEVNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDep | CKBComponents.Script } = {
+  RICH_NODE_INDEXER_URL: 'http://localhost:8114/indexer',
+  RICH_NODE_RPC_URL: 'http://localhost:8114/rpc',
+  EXPLORER_URL: "https://explorer.nervos.org/aggron/transaction/",
+
+  SUDT_TYPE_SCRIPT: {
+    codeHash: "0x0d4b69d980ce5b9601a2c068e99e4e089c3236e83928d7dae418a83c07c40365",
+    hashType: 'data',
+    args: ""
+  } as CKBComponents.Script,
+  SUDT_CELL_DEP: {
+    outPoint: {
+      txHash: "0x9a83ced6df1a0392028002e98883bea7d08e8000955b7e9cbf5626f733d4c786",
+      index: "0x0"
+    },
+    depType: "code"
+  } as CKBComponents.CellDep,
+
+  SUDT_INFO_TYPE_SCRIPT: {
+    codeHash: "0xad13aff9cb9a46a0cf39581089414a7666eaba003418fc51f34434178940c53c",
+    hashType: 'type',
+    args: ""
+  } as CKBComponents.Script,
+  SUDT_INFO_CELL_DEP: {
+    outPoint: {
+      txHash: "0xa82a6c6f8ab7ebf8b527c1ee2c72a25e34d110d3bbf5ef21712be3e2d09dae11",
+      index: "0x0"
+    },
+    depType: "code"
+  } as CKBComponents.CellDep,
+
+  ACP_CELL_DEP: {
+    outPoint: {
+      txHash: "0x0f70b1d248dc24e2e25a7f9d52aadbac0ac045397e58d943a4a4ab05d146388a",
+      index: "0x0"
+    },
+    depType: "depGroup"
+  } as CKBComponents.CellDep,
+  ACP_CODE_HASH: "0x7c174c7bb1aa0fe7943d6ac98b7e82163282f973b00c414754f5838942b8162b",
+  PW_CELL_DEP: {
+    outPoint: {
+      txHash: "0x57a62003daeab9d54aa29b944fc3b451213a5ebdf2e232216a3cfed0dde61b38",
+      index: "0x0"
+    },
+    depType: "code"
+  } as CKBComponents.CellDep,
+  PW_CODE_HASH: "0x58c5f491aba6d61678b7cf7edf4910b1f5e00ec0cde2f42e0abb4fd9aff25a63"
+}
 export const TESTNET_SCRIPT_INFO: { [key: string]: string | CKBComponents.CellDep | CKBComponents.Script } = {
   RICH_NODE_INDEXER_URL: 'https://testnet.ckbapp.dev/indexer',
   RICH_NODE_RPC_URL: 'https://testnet.ckbapp.dev/rpc',

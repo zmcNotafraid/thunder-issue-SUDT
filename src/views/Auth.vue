@@ -65,10 +65,15 @@ export default defineComponent({
       if (this.address === "") {
         this.connectButton = this.$t('buttons.connect')
       } else {
-        if (window.localStorage.getItem("networkId") === "ckb") {
-          this.connectButton = this.$t("buttons.connectedMainnet")
-        } else {
-          this.connectButton = this.$t('buttons.connectedTestnet')
+        switch (window.localStorage.getItem("networkId")) {
+          case 'ckb':
+            this.connectButton = this.$t("buttons.connectedMainnet")
+            break
+          case 'ckb_dev':
+            this.connectButton = this.$t("buttons.connectedDevnet")
+            break
+          default:
+            this.connectButton = this.$t('buttons.connectedTestnet')
         }
       }
     },

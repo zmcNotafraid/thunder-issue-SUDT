@@ -1,6 +1,7 @@
 export default {
   buttons: {
     connect: 'Connect Wallet',
+    connectedDevnet: 'Connected(Devnet)',
     connectedTestnet: 'Connected(Testnet)',
     connectedMainnet: 'Connected(Mainnet)',
     submit: 'Submit',

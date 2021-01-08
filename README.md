@@ -1,4 +1,7 @@
 # ThunderIssueSUDT
+
+> You need to configure your devnet info in src/utils/const first.
+
 An open source GUI for easy issue [SUDT](https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0025-simple-udt/0025-simple-udt.md)
 
 Feature List:

@@ -1,5 +1,5 @@
 import CKBComponents from '@nervosnetwork/ckb-sdk-core'
-import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO } from './index'
+import { MAINNET_SCRIPT_INFO, TESTNET_SCRIPT_INFO, DEVNET_SCRIPT_INFO } from './index'
 import { UnderscoreCell, UnderscoreScript } from '../interface/index'
 
 export const calCapacityAmount = function (cells: Array<UnderscoreCell>): {free: bigint, capacity: bigint} {
@@ -97,5 +97,12 @@ export const calSudtAmount = function(cells: Array<UnderscoreCell>): bigint {
 }
 
 export const getNetworkConst = (key: string): string | CKBComponents.CellDep | CKBComponents.Script => {
-  return window.localStorage.getItem("networkId") === 'ckb' ? MAINNET_SCRIPT_INFO[key] : TESTNET_SCRIPT_INFO[key]
+  switch (window.localStorage.getItem("networkId")) {
+    case 'ckb':
+      return MAINNET_SCRIPT_INFO[key]
+    case 'ckb_dev':
+      return DEVNET_SCRIPT_INFO[key]
+    default:
+      return TESTNET_SCRIPT_INFO[key]
+  }
 }
