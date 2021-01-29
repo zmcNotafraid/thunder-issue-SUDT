@@ -51,7 +51,7 @@ export default defineComponent({
     return {
       form: {
         toAddress: '',
-        transferCount: "0",
+        transferCount: 0,
         selfProvide: false
       },
       inputCells: [] as Array<UnderscoreCell>,
@@ -153,14 +153,14 @@ export default defineComponent({
             type: sudtTypeScript
           })
           const originalToSudtCount = readBigUInt128LE(receiverSudtAcpLiveCells[0].output_data.slice(2))
-          rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount * 10 ** decimal)))
         } else {
           rawTx.outputs.push({
             capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
             lock: receiverLockScript,
             type: sudtTypeScript
           })
-          rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount * 10 ** decimal)))
           restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         }
       } else {
@@ -169,13 +169,13 @@ export default defineComponent({
           lock: receiverLockScript,
           type: sudtTypeScript
         })
-        rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
+        rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount * 10 ** decimal)))
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
       }
 
       const originalSudtCount = calSudtAmount(this.fromSudtCells)
       const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
-      const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** decimal))
+      const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount * 10 ** decimal))
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
         lock: camelCaseScriptKey(fromLockScript),
