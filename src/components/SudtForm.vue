@@ -166,6 +166,7 @@ const Component = defineComponent({
       const data = parseSudtInfoData(sudtInfoCells[0].output_data)
       this.form.name = data.name
       this.form.symbol = data.symbol
+      window.localStorage.setItem('decimal', data.decimal.toString())
       this.form.decimal = data.decimal
       this.infoExist = true
     }

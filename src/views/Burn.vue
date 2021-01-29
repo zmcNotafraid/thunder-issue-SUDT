@@ -57,7 +57,8 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
-      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount)
+      const decimal:number = parseInt(window.localStorage.getItem('decimal') || "8")
+      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount, decimal)
     }
   },
   methods: {

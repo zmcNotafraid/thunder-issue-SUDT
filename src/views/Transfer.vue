@@ -78,7 +78,8 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
-      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount)
+      const decimal:number = parseInt(window.localStorage.getItem('decimal') || "8")
+      this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount, decimal)
     }
   },
   methods: {
@@ -91,6 +92,7 @@ export default defineComponent({
 
       const rawTx: CKBComponents.RawTransactionToSign = getRawTxTemplate()
       const fromLockScript: UnderscoreScript = JSON.parse(window.localStorage.getItem("lockScript") as string)
+      const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
       let inputSignConfig = { index: 0, length: -1 }
       let restCapacity = BigInt(this.biggestCapacityCell.output.capacity)
 
@@ -151,14 +153,14 @@ export default defineComponent({
             type: sudtTypeScript
           })
           const originalToSudtCount = readBigUInt128LE(receiverSudtAcpLiveCells[0].output_data.slice(2))
-          rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount)))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt('0x' + originalToSudtCount) + BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
         } else {
           rawTx.outputs.push({
             capacity: '0x' + SUDT_SMALLEST_CAPACITY.toString(16),
             lock: receiverLockScript,
             type: sudtTypeScript
           })
-          rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
+          rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
           restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
         }
       } else {
@@ -167,13 +169,12 @@ export default defineComponent({
           lock: receiverLockScript,
           type: sudtTypeScript
         })
-        rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount)))
+        rawTx.outputsData.push('0x' + toUint128Le(BigInt(this.form.transferCount) * BigInt(10 ** decimal)))
         restCapacity = restCapacity - SUDT_SMALLEST_CAPACITY
       }
 
       const originalSudtCount = calSudtAmount(this.fromSudtCells)
       const originalCapacity = calCapacityAmount(this.fromSudtCells).capacity
-      const decimal: number = parseInt(window.localStorage.getItem("decimal") || "8")
       const restSudtCount = originalSudtCount - (BigInt(this.form.transferCount) * BigInt(10 ** decimal))
       rawTx.outputs.push({
         capacity: `0x${originalCapacity.toString(16)}`,
