@@ -42,7 +42,8 @@ import {
   underscoreScriptKey,
   showTransactionModal,
   getNetworkConst,
-  isKeyperingConnected
+  isKeyperingConnected,
+  setLocalStorageDecimal
 } from "@/utils"
 import { UnderscoreScript, UnderscoreCell } from '@/interface'
 
@@ -78,6 +79,7 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
+      setLocalStorageDecimal()
       const decimal:number = parseInt(window.localStorage.getItem('decimal') || "8")
       this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount, decimal)
     }
