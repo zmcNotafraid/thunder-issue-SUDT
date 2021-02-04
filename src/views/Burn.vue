@@ -28,7 +28,8 @@ import {
   calCapacityAmount,
   parseBigIntStringNumber,
   showTransactionModal,
-  getNetworkConst
+  getNetworkConst,
+  setLocalStorageDecimal
 } from "@/utils"
 import { UnderscoreCell } from '@/interface'
 
@@ -57,6 +58,7 @@ export default defineComponent({
       this.biggestCapacityCell = inputCells.shift()!
       this.fromSudtCells = inputCells || []
       this.originalSudtCount = calSudtAmount(inputCells)
+      setLocalStorageDecimal()
       const decimal:number = parseInt(window.localStorage.getItem('decimal') || "8")
       this.currentSudtCount = parseBigIntStringNumber(this.originalSudtCount, decimal)
     }

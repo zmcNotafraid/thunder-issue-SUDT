@@ -1,4 +1,4 @@
-import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst, queryAddresses } from "./index"
+import { getCells, compareScript, underscoreScriptKey, getTransaction, getNetworkConst, queryAddresses, parseSudtInfoData } from "./index"
 import { UnderscoreScript, UnderscoreCell } from '../interface'
 import { message, Modal, Spin } from 'ant-design-vue'
 import { ModalFuncProps } from "ant-design-vue/lib/modal/Modal"
@@ -112,6 +112,19 @@ export const isKeyperingConnected = async (componentInstance: ComponentPublicIns
       return false
     } else {
       return true
+    }
+  }
+}
+
+export const setLocalStorageDecimal = async(): Promise<void> => {
+  if (window.localStorage.getItem("decimal") === null) {
+    const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
+    sudtInfoTypeScript.args = window.localStorage.getItem("lockHash") || ""
+
+    const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
+    if (sudtInfoCells.length > 0) {
+      const data = parseSudtInfoData(sudtInfoCells[0].output_data)
+      window.localStorage.setItem('decimal', data.decimal.toString())
     }
   }
 }
