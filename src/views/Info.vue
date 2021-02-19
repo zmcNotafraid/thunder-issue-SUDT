@@ -2,7 +2,7 @@
   <div>
     <a-row>
       <a-col :span="8">
-        <a-button type="primary" @click="showModal">
+        <a-button type="primary" @click="showModal" v-if="mainnet !== true">
           {{ $t('buttons.updateTokenInfo') }}
         </a-button>
       </a-col>
@@ -85,7 +85,8 @@ export default defineComponent({
       name: '',
       symbol: '',
       decimal: -1,
-      address: ''
+      address: '',
+      mainnet: window.localStorage.getItem("networkId") === "ckb"
     }
   },
   async mounted() {
@@ -101,6 +102,8 @@ export default defineComponent({
       this.address = ''
       return
     }
+
+    this.address = window.localStorage.getItem('address') || ''
 
     const sudtInfoTypeScript = getNetworkConst(
       'SUDT_INFO_TYPE_SCRIPT'
@@ -119,7 +122,6 @@ export default defineComponent({
     this.name = sudtInfo.name
     this.symbol = sudtInfo.symbol
     this.decimal = sudtInfo.decimal
-    this.address = window.localStorage.getItem('address') || ''
   },
   methods: {
     showModal() {

@@ -6,21 +6,21 @@
     :label-col="labelCol"
     :wrapper-col="wrapperCol"
   >
-    <a-form-item :label="$t('labels.tokenName')" name="name" >
+    <a-form-item :label="$t('labels.tokenName')" name="name" v-if="mainnet !== true">
       <a-input
         v-model:value="form.name"
         :disabled="issueSudt && infoExist"
         :placeholder="$t('placeholder.maxLength', { length: 32 })"
       />
     </a-form-item>
-    <a-form-item :label="$t('labels.tokenSymbol')" name="symbol">
+    <a-form-item :label="$t('labels.tokenSymbol')" name="symbol" v-if="mainnet !== true">
       <a-input
         v-model:value="form.symbol"
         :disabled="issueSudt && infoExist"
         :placeholder="$t('placeholder.maxLength', { length: 8 })"
       />
     </a-form-item>
-    <a-form-item :label="$t('labels.tokenDecimal')" name="decimal">
+    <a-form-item :label="$t('labels.tokenDecimal')" name="decimal" v-if="mainnet !== true">
       <a-input-number
         v-model:value="form.decimal"
         :disabled="issueSudt && infoExist"
@@ -78,6 +78,7 @@ const Component = defineComponent({
   data: function () {
     return {
       infoExist: false,
+      mainnet: window.localStorage.getItem("networkId") === "ckb",
       form: {
         name: '',
         symbol: '',
@@ -158,17 +159,19 @@ const Component = defineComponent({
       return
     }
 
-    const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
-    sudtInfoTypeScript.args = window.localStorage.getItem("lockHash") || ""
+    if (this.mainnet !== true) {
+      const sudtInfoTypeScript = getNetworkConst("SUDT_INFO_TYPE_SCRIPT") as CKBComponents.Script
+      sudtInfoTypeScript.args = window.localStorage.getItem("lockHash") || ""
 
-    const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
-    if (sudtInfoCells.length > 0) {
-      const data = parseSudtInfoData(sudtInfoCells[0].output_data)
-      this.form.name = data.name
-      this.form.symbol = data.symbol
-      window.localStorage.setItem('decimal', data.decimal.toString())
-      this.form.decimal = data.decimal
-      this.infoExist = true
+      const sudtInfoCells = await getCells('type', underscoreScriptKey(sudtInfoTypeScript))
+      if (sudtInfoCells.length > 0) {
+        const data = parseSudtInfoData(sudtInfoCells[0].output_data)
+        this.form.name = data.name
+        this.form.symbol = data.symbol
+        window.localStorage.setItem('decimal', data.decimal.toString())
+        this.form.decimal = data.decimal
+        this.infoExist = true
+      }
     }
   },
   methods: {
@@ -221,7 +224,7 @@ const Component = defineComponent({
       })
       rawTx.witnesses.push('0x')
 
-      if ((!this.infoExist && this.issueSudt) || !this.issueSudt) {
+      if (this.mainnet !== true && ((!this.infoExist && this.issueSudt) || !this.issueSudt)) {
         rawTx.cellDeps.push(getNetworkConst("SUDT_INFO_CELL_DEP") as CKBComponents.CellDep)
 
         restCapacity = restCapacity - SUDT_INFO_SMALLEST_CAPACITY
